@@ -124,7 +124,13 @@ jobs:
           echo "🔐 Setting permissions..."
           chmod -R 755 storage bootstrap/cache 2>/dev/null || true
           
-          echo "🔄 Updating current symlink..."
+          echo "� Fixing case-sensitive directories..."
+          # Rename pages to Pages for Linux case-sensitivity
+          if [ -d "resources/js/pages" ]; then
+            mv resources/js/pages resources/js/Pages
+          fi
+          
+          echo "�🔄 Updating current symlink..."
           cd ../..
           ln -sfn "$RELEASE_DIR" current
           

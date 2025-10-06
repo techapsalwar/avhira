@@ -1,0 +1,7 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Redirect all requests to the Laravel public directory
+    RewriteCond %{REQUEST_URI} !^/avhira/current/public/
+    RewriteRule ^(.*)$ /avhira/current/public/$1 [L,QSA]
+</IfModule>
