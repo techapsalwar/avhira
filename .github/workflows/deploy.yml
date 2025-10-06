@@ -40,7 +40,7 @@ jobs:
         run: composer install --optimize-autoloader --no-dev --prefer-dist --no-interaction
 
       - name: Install NPM Dependencies
-        run: npm ci
+        run: npm install --prefer-offline --no-audit
 
       - name: Build Frontend Assets
         run: npm run build
