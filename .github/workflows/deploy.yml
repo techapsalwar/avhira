@@ -1,0 +1,141 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🚀 Checkout code
+      uses: actions/checkout@v3
+      
+    - name: 🐘 Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json, zip
+        coverage: none
+        
+    - name: 📦 Install Composer dependencies
+      run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+      
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: 📦 Install NPM dependencies
+      run: npm ci
+      
+    - name: 🏗️ Build assets with Vite
+      run: npm run build
+      
+    - name: 📦 Create deployment archive
+      run: |
+        mkdir -p deployment
+        rsync -av --exclude='.git' \
+          --exclude='node_modules' \
+          --exclude='tests' \
+          --exclude='.env' \
+          --exclude='.env.example' \
+          --exclude='.github' \
+          --exclude='storage/framework/cache/*' \
+          --exclude='storage/framework/sessions/*' \
+          --exclude='storage/framework/views/*' \
+          --exclude='storage/logs/*' \
+          --exclude='README.md' \
+          --exclude='.gitignore' \
+          --exclude='.editorconfig' \
+          --exclude='phpunit.xml' \
+          ./ deployment/
+        cd deployment
+        tar -czf ../deployment.tar.gz .
+        
+    - name: 📤 Deploy to Hostinger via SCP
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: ${{ secrets.SSH_PORT }}
+        source: "deployment.tar.gz"
+        target: "/tmp"
+        
+    - name: 🔧 Execute deployment on server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+          cd ${{ secrets.PROJECT_PATH }}
+          
+          echo "📦 Creating backup of current deployment..."
+          if [ -d "current" ]; then
+            BACKUP_NAME="backup-$(date +%Y%m%d-%H%M%S).tar.gz"
+            tar -czf "$BACKUP_NAME" current/ 2>/dev/null || echo "Backup creation skipped"
+            # Keep only last 5 backups
+            ls -t backup-*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm
+          fi
+          
+          echo "🚀 Creating new release directory..."
+          RELEASE_DIR="releases/$(date +%Y%m%d-%H%M%S)"
+          mkdir -p "$RELEASE_DIR"
+          
+          echo "📦 Extracting deployment..."
+          tar -xzf /tmp/deployment.tar.gz -C "$RELEASE_DIR"
+          
+          echo "📁 Setting up shared directories..."
+          mkdir -p shared/storage/{app,framework,logs}
+          mkdir -p shared/storage/framework/{cache,sessions,views}
+          mkdir -p shared/storage/app/{public,private}
+          mkdir -p shared/bootstrap/cache
+          
+          echo "🔗 Linking shared resources..."
+          cd "$RELEASE_DIR"
+          rm -rf storage bootstrap/cache
+          ln -sfn ../../shared/storage storage
+          ln -sfn ../../shared/bootstrap/cache bootstrap/cache
+          
+          # Create .env symlink if shared .env exists
+          if [ -f ../../shared/.env ]; then
+            rm -f .env
+            ln -sfn ../../shared/.env .env
+          else
+            echo "⚠️  Warning: shared/.env not found. Please create it manually."
+          fi
+          
+          echo "🔐 Setting permissions..."
+          chmod -R 755 storage bootstrap/cache 2>/dev/null || true
+          
+          echo "🔄 Updating current symlink..."
+          cd ../..
+          ln -sfn "$RELEASE_DIR" current
+          
+          echo "⚙️  Running Laravel optimizations..."
+          cd current
+          php artisan config:cache 2>/dev/null || echo "Config cache skipped"
+          php artisan route:cache 2>/dev/null || echo "Route cache skipped"
+          php artisan view:cache 2>/dev/null || echo "View cache skipped"
+          
+          echo "🗄️  Running migrations..."
+          php artisan migrate --force 2>/dev/null || echo "Migrations skipped"
+          
+          echo "🔗 Creating storage link..."
+          php artisan storage:link 2>/dev/null || echo "Storage link already exists"
+          
+          echo "🧹 Cleaning up old releases..."
+          cd ..
+          ls -t releases | tail -n +4 | xargs -r rm -rf
+          
+          echo "🗑️  Removing temporary files..."
+          rm /tmp/deployment.tar.gz
+          
+          echo "✅ Deployment completed successfully!"
+          echo "📍 Active release: $RELEASE_DIR"

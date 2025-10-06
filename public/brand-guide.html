@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avhira Brand Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #faf5f6;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 48px;
+            color: #be1e2d;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 60px;
+            font-size: 18px;
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .color-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        
+        .color-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 30px rgba(190, 30, 45, 0.15);
+        }
+        
+        .color-preview {
+            height: 180px;
+            width: 100%;
+        }
+        
+        .color-info {
+            padding: 24px;
+        }
+        
+        .color-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .color-code {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .color-usage {
+            font-size: 14px;
+            color: #888;
+            margin-top: 12px;
+            line-height: 1.6;
+        }
+        
+        .example-section {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 40px;
+        }
+        
+        .example-title {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .button-showcase {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #be1e2d, #9a1824);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(190, 30, 45, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #be1e2d;
+            color: #be1e2d;
+        }
+        
+        .btn-outline:hover {
+            background: #be1e2d;
+            color: white;
+        }
+        
+        .product-card-demo {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            max-width: 300px;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card-demo:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 30px rgba(190, 30, 45, 0.15);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #faf5f6, #f0e8ea);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #be1e2d;
+            position: relative;
+        }
+        
+        .discount-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #be1e2d;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        .product-info {
+            padding: 20px;
+        }
+        
+        .product-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        
+        .price-section {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .sale-price {
+            font-size: 22px;
+            font-weight: 700;
+            color: #be1e2d;
+        }
+        
+        .original-price {
+            font-size: 14px;
+            color: #999;
+            text-decoration: line-through;
+        }
+        
+        .add-to-cart {
+            width: 100%;
+            background: linear-gradient(135deg, #be1e2d, #9a1824);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .add-to-cart:hover {
+            transform: scale(1.02);
+        }
+        
+        .typography-section {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .text-sample {
+            padding: 16px;
+            border-left: 4px solid #be1e2d;
+            background: #faf5f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AVHIRA</h1>
+        <p class="subtitle">Brand Style Guide - Colors & Components</p>
+        
+        <!-- Color Palette -->
+        <div class="color-grid">
+            <div class="color-card">
+                <div class="color-preview" style="background: #be1e2d;"></div>
+                <div class="color-info">
+                    <div class="color-name">Avhira Red</div>
+                    <div class="color-code">HEX: #be1e2d</div>
+                    <div class="color-code">RGB: rgb(190, 30, 45)</div>
+                    <div class="color-usage">
+                        Primary brand color. Use for CTAs, buttons, highlights, and important UI elements.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="color-card">
+                <div class="color-preview" style="background: #9a1824;"></div>
+                <div class="color-info">
+                    <div class="color-name">Dark Red</div>
+                    <div class="color-code">HEX: #9a1824</div>
+                    <div class="color-code">RGB: rgb(154, 24, 36)</div>
+                    <div class="color-usage">
+                        Hover states, gradients, and darker accents. Provides depth to the primary color.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="color-card">
+                <div class="color-preview" style="background: #d94452;"></div>
+                <div class="color-info">
+                    <div class="color-name">Light Red</div>
+                    <div class="color-code">HEX: #d94452</div>
+                    <div class="color-code">RGB: rgb(217, 68, 82)</div>
+                    <div class="color-usage">
+                        Subtle highlights, badges, and lighter accent elements. Use sparingly for variety.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="color-card">
+                <div class="color-preview" style="background: #faf5f6;"></div>
+                <div class="color-info">
+                    <div class="color-name">Background</div>
+                    <div class="color-code">HEX: #faf5f6</div>
+                    <div class="color-code">RGB: rgb(250, 245, 246)</div>
+                    <div class="color-usage">
+                        Main background color. Soft and elegant, provides subtle warmth to the overall design.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Button Examples -->
+        <div class="example-section">
+            <h2 class="example-title">Button Styles</h2>
+            <div class="button-showcase">
+                <button class="btn btn-primary">Add to Cart</button>
+                <button class="btn btn-outline">View Details</button>
+                <button class="btn btn-primary">Shop Now</button>
+                <button class="btn btn-outline">Learn More</button>
+            </div>
+        </div>
+        
+        <!-- Product Card Example -->
+        <div class="example-section">
+            <h2 class="example-title">Product Card Example</h2>
+            <div class="product-card-demo">
+                <div class="product-image">
+                    <span class="discount-badge">-20%</span>
+                    👕
+                </div>
+                <div class="product-info">
+                    <div class="product-title">Premium Cotton T-Shirt</div>
+                    <div class="price-section">
+                        <span class="sale-price">₹799</span>
+                        <span class="original-price">₹999</span>
+                    </div>
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Typography -->
+        <div class="example-section">
+            <h2 class="example-title">Typography & Text Styles</h2>
+            <div class="typography-section">
+                <div class="text-sample">
+                    <h1 style="color: #be1e2d; font-size: 36px; margin-bottom: 8px;">Heading 1 - Hero Title</h1>
+                    <p style="color: #666;">Large headings for hero sections and main titles</p>
+                </div>
+                
+                <div class="text-sample">
+                    <h2 style="color: #333; font-size: 28px; margin-bottom: 8px;">Heading 2 - Section Title</h2>
+                    <p style="color: #666;">Section headings and category titles</p>
+                </div>
+                
+                <div class="text-sample">
+                    <h3 style="color: #333; font-size: 20px; margin-bottom: 8px;">Heading 3 - Product Title</h3>
+                    <p style="color: #666;">Product names and card titles</p>
+                </div>
+                
+                <div class="text-sample">
+                    <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                        Body Text - This is the standard body text used for descriptions, content, and general information. 
+                        It should be easily readable with good contrast.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Usage Guidelines -->
+        <div class="example-section">
+            <h2 class="example-title">Usage Guidelines</h2>
+            <div style="line-height: 2;">
+                <p><strong style="color: #be1e2d;">✓ DO:</strong> Use Avhira Red (#be1e2d) for primary actions and branding</p>
+                <p><strong style="color: #be1e2d;">✓ DO:</strong> Maintain consistent spacing and padding</p>
+                <p><strong style="color: #be1e2d;">✓ DO:</strong> Use gradients for buttons (from #be1e2d to #9a1824)</p>
+                <p><strong style="color: #be1e2d;">✓ DO:</strong> Keep the background soft with #faf5f6</p>
+                <p><strong style="color: #999;">✗ DON'T:</strong> Use competing bright colors</p>
+                <p><strong style="color: #999;">✗ DON'T:</strong> Overuse the red color - balance with neutrals</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+HERO SECTION IMAGE CAROUSEL
+===========================
+
+Add 4 product images to this folder for the hero section carousel:
+
+Required Files:
+- product-1.jpg  (First carousel image)
+- product-2.jpg  (Second carousel image)
+- product-3.jpg  (Third carousel image)
+- product-4.jpg  (Fourth carousel image)
+
+Recommended Specifications:
+- Dimensions: 800x1200px (3:4 aspect ratio)
+- Format: JPG or PNG
+- Max file size: 500KB each (optimized)
+- Orientation: Portrait/Vertical
+
+Features:
+- Auto-rotates every 4 seconds
+- Smooth fade and scale transitions
+- Manual navigation with prev/next buttons
+- Interactive dot indicators
+
+Current path: public/images/hero/
