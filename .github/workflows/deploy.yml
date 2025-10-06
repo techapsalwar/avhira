@@ -100,9 +100,18 @@ jobs:
           
           echo "🔗 Linking shared resources..."
           cd "$RELEASE_DIR"
-          rm -rf storage bootstrap/cache
+          rm -rf storage
           ln -sfn ../../shared/storage storage
-          ln -sfn ../../shared/bootstrap/cache bootstrap/cache
+          
+          echo "📁 Creating bootstrap/cache directory..."
+          # Create actual directory instead of symlink (Laravel requirement)
+          mkdir -p bootstrap/cache
+          chmod -R 775 bootstrap/cache
+          
+          # Copy shared cache files if they exist
+          if [ -f ../../shared/bootstrap/cache/packages.php ]; then
+            cp ../../shared/bootstrap/cache/*.php bootstrap/cache/ 2>/dev/null || true
+          fi
           
           # Create .env symlink if shared .env exists
           if [ -f ../../shared/.env ]; then
