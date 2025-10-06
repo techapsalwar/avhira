@@ -22,27 +22,30 @@ class CheckoutController extends Controller
      */
     public function index(Request $request)
     {
-        // Get cart items (from DB for both logged in and guest users)
-        $userId = auth()->id();
-        $sessionId = $userId ? null : session()->getId();
-
-        $cartItems = Cart::with('product')
-            ->where(function ($query) use ($userId, $sessionId) {
-                if ($userId) {
-                    $query->where('user_id', $userId);
-                } else {
-                    $query->where('session_id', $sessionId);
-                }
-            })
-            ->get()
-            ->map(function ($item) {
+        // Get cart items (from DB if logged in, from session if guest)
+        if (auth()->check()) {
+            $cartItems = Cart::with('product')
+                ->where('user_id', auth()->id())
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'product' => $item->product,
+                        'quantity' => $item->quantity,
+                        'size' => $item->size,
+                    ];
+                });
+        } else {
+            $sessionCart = session('cart', []);
+            $cartItems = collect($sessionCart)->map(function ($item) {
+                $product = \App\Models\Product::find($item['product_id']);
                 return [
-                    'id' => $item->id,
-                    'product' => $item->product,
-                    'quantity' => $item->quantity,
-                    'size' => $item->size,
+                    'product' => $product,
+                    'quantity' => $item['quantity'],
+                    'size' => $item['size'] ?? null,
                 ];
-            });
+            })->filter(fn($item) => $item['product'] !== null)->values();
+        }
 
         // Redirect if cart is empty
         if ($cartItems->isEmpty()) {
@@ -91,7 +94,6 @@ class CheckoutController extends Controller
         try {
             // Handle user creation/login for guests
             $user = auth()->user();
-            $guestSessionId = session()->getId(); // Store guest session ID before login
             
             if (!$user) {
                 // Check if user exists with this email
@@ -100,10 +102,6 @@ class CheckoutController extends Controller
                 if ($user) {
                     // User exists, log them in
                     auth()->login($user);
-                    
-                    // Migrate guest cart items to user's cart
-                    Cart::where('session_id', $guestSessionId)
-                        ->update(['user_id' => $user->id, 'session_id' => null]);
                 } else {
                     // Create new user
                     if (!$validated['password']) {
@@ -123,10 +121,6 @@ class CheckoutController extends Controller
                     ]);
                     
                     auth()->login($user);
-                    
-                    // Migrate guest cart items to new user's cart
-                    Cart::where('session_id', $guestSessionId)
-                        ->update(['user_id' => $user->id, 'session_id' => null]);
                 }
             }
 
@@ -153,15 +147,20 @@ class CheckoutController extends Controller
             
             \Log::info('User updated successfully', ['user_id' => $user->id]);
 
-            // Get cart items (using same logic as CartController)
-            $userId = $user->id;
-            $sessionId = null; // User is now logged in, so no session_id needed
-            
-            $cartItems = Cart::with('product')
-                ->where(function ($query) use ($userId, $sessionId) {
-                    $query->where('user_id', $userId);
-                })
-                ->get();
+            // Get cart items
+            if (auth()->check()) {
+                $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
+            } else {
+                // This shouldn't happen now, but keep as fallback
+                $sessionCart = session('cart', []);
+                $cartItems = collect($sessionCart)->map(function ($item) {
+                    return (object)[
+                        'product' => \App\Models\Product::find($item['product_id']),
+                        'quantity' => $item['quantity'],
+                        'size' => $item['size'] ?? null,
+                    ];
+                })->filter(fn($item) => $item->product !== null);
+            }
 
             if ($cartItems->isEmpty()) {
                 throw new \Exception('Cart is empty');

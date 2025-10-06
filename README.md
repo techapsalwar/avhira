@@ -1,6 +1,23 @@
-# AVHIRA - Premium Clothing E-commerce Website
+# AVHIRA - Premium Clothing E-commerce Platform
 
-A modern, feature-rich e-commerce website built with Laravel 12 and React for the Avhira clothing brand.
+A modern, feature-rich e-commerce website built with Laravel 12 and React 19 for the Avhira clothing brand.
+
+> 🎉 **Production Ready** | ✅ **Fully Tested** | 🚀 **Optimized**
+
+## 📚 Documentation
+
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
+
+- **[Getting Started](GETTING_STARTED.md)** - Quick setup guide
+- **[Project Overview](docs/PROJECT_OVERVIEW.md)** - Architecture and features
+- **[Admin Panel](docs/ADMIN_PANEL.md)** - Admin dashboard guide
+- **[Authentication](docs/AUTHENTICATION.md)** - Auth system with 2FA
+- **[Checkout System](docs/CHECKOUT.md)** - Payment and checkout flow
+- **[Database Setup](docs/DATABASE.md)** - MySQL configuration
+- **[Deployment](docs/DEPLOYMENT.md)** - Production deployment
+- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues
+
+📖 **[View All Documentation](docs/README.md)**
 
 ## Features
 

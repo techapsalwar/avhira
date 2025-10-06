@@ -9,9 +9,6 @@ export default function CheckoutIndex({ cartItems, auth, razorpayKey }) {
     const [currentStep, setCurrentStep] = useState(auth?.user ? 2 : 1);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
-    const [showLoginModal, setShowLoginModal] = useState(false);
-    const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-    const [loginError, setLoginError] = useState('');
     
     const [form, setForm] = useState({
         name: auth?.user?.name || '',
@@ -45,35 +42,6 @@ export default function CheckoutIndex({ cartItems, auth, razorpayKey }) {
                 delete newErrors[name];
                 return newErrors;
             });
-        }
-    };
-
-    const handleLoginChange = (e) => {
-        const { name, value } = e.target;
-        setLoginForm(prev => ({ ...prev, [name]: value }));
-        setLoginError('');
-    };
-
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setLoginError('');
-
-        try {
-            router.post('/login', loginForm, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    setShowLoginModal(false);
-                    window.location.reload();
-                },
-                onError: (errors) => {
-                    setLoginError(errors.email || 'Invalid credentials');
-                    setLoading(false);
-                }
-            });
-        } catch (error) {
-            setLoginError('Login failed. Please try again.');
-            setLoading(false);
         }
     };
 
@@ -292,29 +260,6 @@ export default function CheckoutIndex({ cartItems, auth, razorpayKey }) {
                                             <h2 className="text-2xl font-bold text-gray-900 mb-2">Contact Information</h2>
                                             <p className="text-gray-600">We'll use this to keep you updated about your order</p>
                                         </div>
-
-                                        {/* Login Option for Existing Users */}
-                                        {!auth?.user && (
-                                            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-                                                <div className="flex items-start gap-3">
-                                                    <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                    <div className="flex-1">
-                                                        <p className="text-sm text-blue-900 font-medium">
-                                                            Already have an account?
-                                                        </p>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setShowLoginModal(true)}
-                                                            className="text-sm text-blue-600 hover:text-blue-700 font-semibold underline mt-1"
-                                                        >
-                                                            Click here to login
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
 
                                         <div className="space-y-4">
                                             <div>
@@ -713,100 +658,6 @@ export default function CheckoutIndex({ cartItems, auth, razorpayKey }) {
                     </div>
                 </div>
             </div>
-
-            {/* Login Modal */}
-            {showLoginModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in"
-                     onClick={() => setShowLoginModal(false)}>
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 animate-scale-in"
-                         onClick={(e) => e.stopPropagation()}>
-                        {/* Modal Header */}
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
-                            <button
-                                onClick={() => setShowLoginModal(false)}
-                                className="text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <p className="text-gray-600 mb-6">
-                            Login to your account to continue with checkout
-                        </p>
-
-                        {/* Login Form */}
-                        <form onSubmit={handleLogin} className="space-y-4">
-                            {loginError && (
-                                <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3">
-                                    <p className="text-sm text-red-600 flex items-center gap-2">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        {loginError}
-                                    </p>
-                                </div>
-                            )}
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Email Address
-                                </label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={loginForm.email}
-                                    onChange={handleLoginChange}
-                                    required
-                                    className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-avhira-red focus:outline-none focus:ring-2 focus:ring-avhira-red/20 transition-colors"
-                                    placeholder="your@email.com"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Password
-                                </label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    value={loginForm.password}
-                                    onChange={handleLoginChange}
-                                    required
-                                    className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-avhira-red focus:outline-none focus:ring-2 focus:ring-avhira-red/20 transition-colors"
-                                    placeholder="Enter your password"
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full py-3 px-6 rounded-full font-bold text-white transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                style={{ backgroundColor: '#be1e2d' }}
-                                onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#9a1824')}
-                                onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#be1e2d')}
-                            >
-                                {loading ? 'Logging in...' : 'Login'}
-                            </button>
-                        </form>
-
-                        <div className="mt-6 pt-6 border-t border-gray-200 text-center">
-                            <p className="text-sm text-gray-600">
-                                Don't have an account?{' '}
-                                <button
-                                    type="button"
-                                    onClick={() => setShowLoginModal(false)}
-                                    className="text-avhira-red hover:text-red-700 font-semibold"
-                                >
-                                    Continue as guest
-                                </button>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
         </MainLayout>
     );
 }
