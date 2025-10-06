@@ -27,10 +27,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18'
-        cache: 'npm'
         
     - name: 📦 Install NPM dependencies
-      run: npm ci
+      run: npm install --production=false
       
     - name: 🏗️ Build assets with Vite
       run: npm run build
