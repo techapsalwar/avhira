@@ -8,6 +8,7 @@ import GlobalToastProvider from './Components/GlobalToastProvider';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Avhira';
 
+// Inertia app setup with eager page loading for production
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) =>
