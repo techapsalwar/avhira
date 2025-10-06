@@ -29,7 +29,9 @@ jobs:
         node-version: '18'
         
     - name: 📦 Install NPM dependencies
-      run: npm install --production=false
+      run: |
+        rm -f package-lock.json
+        npm install
       
     - name: 🏗️ Build assets with Vite
       run: npm run build
