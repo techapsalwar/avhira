@@ -61,8 +61,8 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           script: |
-            # Navigate to application directory
-            cd ${{ secrets.HOSTINGER_APP_PATH }}
+            # Navigate to Laravel application directory
+            cd /home/u885878505/domains/avhira.com/avhira
             
             # Create backup of current deployment
             BACKUP_DIR="backups/$(date +%Y%m%d_%H%M%S)"
@@ -90,7 +90,7 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           source: "deploy.tar.gz"
-          target: ${{ secrets.HOSTINGER_APP_PATH }}
+          target: "/home/u885878505/domains/avhira.com/avhira"
 
       - name: Extract and Finalize Deployment
         uses: appleboy/ssh-action@v1
@@ -101,17 +101,68 @@ jobs:
           port: ${{ secrets.HOSTINGER_PORT }}
           command_timeout: 20m
           script: |
-            # Navigate to application directory
-            cd ${{ secrets.HOSTINGER_APP_PATH }}
+            # Define paths
+            LARAVEL_PATH="/home/u885878505/domains/avhira.com/avhira"
+            WEB_ROOT="/home/u885878505/domains/avhira.com/public_html"
+            
+            # Navigate to Laravel application directory
+            cd $LARAVEL_PATH
             
             # Extract deployment package
             tar -xzf deploy.tar.gz
             rm deploy.tar.gz
             
+            # Deploy build assets to web root
+            echo "Deploying frontend assets to web root..."
+            if [ -d "public/build" ]; then
+              rm -f public/build
+              rm -rf $WEB_ROOT/build
+              cp -r public/build $WEB_ROOT/build
+              echo "Build assets deployed to web root"
+              ln -sf $WEB_ROOT/build $LARAVEL_PATH/public/build
+            fi
+            
+            # Copy other public assets to web root
+            for item in favicon.ico favicon.svg apple-touch-icon.png logo.svg robots.txt images; do
+              if [ -e "public/$item" ]; then
+                cp -r public/$item $WEB_ROOT/
+              fi
+            done
+            
+            # Create index.php in web root
+            echo "<?php" > $WEB_ROOT/index.php
+            echo "" >> $WEB_ROOT/index.php
+            echo "use Illuminate\\Http\\Request;" >> $WEB_ROOT/index.php
+            echo "" >> $WEB_ROOT/index.php
+            echo "define('LARAVEL_START', microtime(true));" >> $WEB_ROOT/index.php
+            echo "" >> $WEB_ROOT/index.php
+            echo "if (file_exists(__DIR__.'/../avhira/storage/framework/maintenance.php')) {" >> $WEB_ROOT/index.php
+            echo "    require __DIR__.'/../avhira/storage/framework/maintenance.php';" >> $WEB_ROOT/index.php
+            echo "}" >> $WEB_ROOT/index.php
+            echo "" >> $WEB_ROOT/index.php
+            echo "require __DIR__.'/../avhira/vendor/autoload.php';" >> $WEB_ROOT/index.php
+            echo "" >> $WEB_ROOT/index.php
+            echo "(require_once __DIR__.'/../avhira/bootstrap/app.php')" >> $WEB_ROOT/index.php
+            echo "    ->handleRequest(Request::capture());" >> $WEB_ROOT/index.php
+            echo "index.php created in web root"
+            
+            # Copy .htaccess to web root
+            if [ -f "public/.htaccess" ]; then
+              cp public/.htaccess $WEB_ROOT/.htaccess
+            fi
+            
             # Restore .env file from backup if it doesn't exist
             if [ ! -f ".env" ] && [ -f "backups/latest/.env" ]; then
               cp backups/latest/.env .env
             fi
+            
+            # Create public directory if it doesn't exist
+            mkdir -p public
+            
+            # Create storage symlink
+            rm -f $WEB_ROOT/storage
+            ln -sf $LARAVEL_PATH/storage/app/public $WEB_ROOT/storage
+            echo "Storage symlink created"
             
             # Set proper permissions
             chmod -R 755 storage bootstrap/cache
@@ -123,7 +174,7 @@ jobs:
             php artisan view:cache
             php artisan event:cache
             
-            # Run database migrations (with --force for production)
+            # Run database migrations
             php artisan migrate --force
             
             # Clear and optimize
@@ -136,6 +187,8 @@ jobs:
             ln -sfn backups/$(ls -t backups | head -1) backups/latest
             
             echo "Deployment completed successfully!"
+            echo "Laravel app at $LARAVEL_PATH"
+            echo "Web root at $WEB_ROOT"
             echo "Application is now live on avhira.com"
 
       - name: Deployment Status Notification
