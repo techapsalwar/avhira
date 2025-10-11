@@ -207,7 +207,7 @@ jobs:
             echo "Deployment completed successfully!"
             echo "Laravel app at $LARAVEL_PATH"
             echo "Web root at $WEB_ROOT"
-            echo "Application is now live on avhira.com"
+            echo "Application is now live at ${{ steps.set-env.outputs.domain }}"
 
       - name: Deployment Status Notification
         if: always()
