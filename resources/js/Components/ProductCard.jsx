@@ -170,14 +170,14 @@ export default function ProductCard({ product }) {
                     />
                     
                     {/* Interactive overlay on product image */}
-                    <div className="absolute bottom-4 right-4 left-4 md:left-auto">
-                        <div className="flex items-center justify-end gap-2">
+                    <div className="absolute bottom-0 md:bottom-4 right-0 md:right-4 left-0 md:left-auto">
+                        <div className="flex items-center justify-end gap-1 md:gap-2 px-2 pb-2 md:p-0">
                             {/* Horizontal sliding bar - slides from right */}
                             {step !== 'idle' && (
-                                <div className="animate-in slide-in-from-right duration-300 flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-full px-3 md:px-4 py-2 md:py-3 shadow-lg h-10 md:h-12 max-w-[calc(100%-3.5rem)]">
+                                <div className="animate-in slide-in-from-right duration-300 flex items-center gap-1 md:gap-2 bg-white/95 backdrop-blur-sm rounded-full px-2 md:px-4 py-1.5 md:py-3 shadow-lg h-9 md:h-12 max-w-[calc(100%-2.5rem)] md:max-w-none">
                                     {/* Size Selector */}
                                     {step === 'size' && (
-                                        <div className="flex items-center gap-1 md:gap-1.5 overflow-x-auto scrollbar-hide">
+                                        <div className="flex items-center gap-0.5 md:gap-1.5 overflow-x-auto scrollbar-hide">
                                             {availableSizes.map((size, index) => (
                                                 <button
                                                     key={index}
@@ -186,7 +186,7 @@ export default function ProductCard({ product }) {
                                                         e.stopPropagation();
                                                         handleSizeSelect(size);
                                                     }}
-                                                    className="w-7 h-7 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center text-xs font-bold rounded-full border-2 border-[#be1e2d] text-[#be1e2d] hover:bg-[#be1e2d] hover:text-white transition-all duration-200"
+                                                    className="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center text-[10px] md:text-xs font-bold rounded-full border-2 border-[#be1e2d] text-[#be1e2d] hover:bg-[#be1e2d] hover:text-white transition-all duration-200"
                                                 >
                                                     {size}
                                                 </button>
@@ -196,10 +196,10 @@ export default function ProductCard({ product }) {
                                     
                                     {/* Quantity Controls (after size selection) */}
                                     {step === 'quantity' && (
-                                        <div className="flex items-center gap-1.5 md:gap-2">
+                                        <div className="flex items-center gap-0.5 md:gap-1.5">
                                             {/* Minimized size display */}
                                             {selectedSize && (
-                                                <span className="text-xs font-semibold text-[#be1e2d] px-1.5 md:px-2">
+                                                <span className="text-[10px] md:text-xs font-bold text-[#be1e2d] px-1 md:px-2">
                                                     {selectedSize}
                                                 </span>
                                             )}
@@ -212,12 +212,12 @@ export default function ProductCard({ product }) {
                                                     setQuantity(Math.max(1, quantity - 1));
                                                 }}
                                                 disabled={quantity <= 1}
-                                                className="w-6 h-6 md:w-7 md:h-7 flex-shrink-0 rounded-full bg-gray-100 hover:bg-[#be1e2d] hover:text-white disabled:opacity-30 disabled:hover:bg-gray-100 disabled:hover:text-current transition-all duration-200 flex items-center justify-center"
+                                                className="w-5 h-5 md:w-7 md:h-7 flex-shrink-0 rounded-full bg-gray-100 hover:bg-[#be1e2d] hover:text-white disabled:opacity-30 disabled:hover:bg-gray-100 disabled:hover:text-current transition-all duration-200 flex items-center justify-center"
                                             >
-                                                <Minus className="w-3 h-3" />
+                                                <Minus className="w-2.5 h-2.5 md:w-3 md:h-3" />
                                             </button>
                                             
-                                            <span className="text-xs md:text-sm font-bold text-gray-900 w-5 md:w-6 text-center">{quantity}</span>
+                                            <span className="text-[10px] md:text-sm font-bold text-gray-900 w-3 md:w-5 text-center">{quantity}</span>
                                             
                                             <button
                                                 onClick={(e) => {
@@ -226,9 +226,9 @@ export default function ProductCard({ product }) {
                                                     setQuantity(Math.min(10, quantity + 1));
                                                 }}
                                                 disabled={quantity >= 10}
-                                                className="w-6 h-6 md:w-7 md:h-7 flex-shrink-0 rounded-full bg-gray-100 hover:bg-[#be1e2d] hover:text-white disabled:opacity-30 disabled:hover:bg-gray-100 disabled:hover:text-current transition-all duration-200 flex items-center justify-center"
+                                                className="w-5 h-5 md:w-7 md:h-7 flex-shrink-0 rounded-full bg-gray-100 hover:bg-[#be1e2d] hover:text-white disabled:opacity-30 disabled:hover:bg-gray-100 disabled:hover:text-current transition-all duration-200 flex items-center justify-center"
                                             >
-                                                <Plus className="w-3 h-3" />
+                                                <Plus className="w-2.5 h-2.5 md:w-3 md:h-3" />
                                             </button>
                                         </div>
                                     )}
@@ -239,10 +239,10 @@ export default function ProductCard({ product }) {
                             <button
                                 onClick={handleCartIconClick}
                                 disabled={isAddingToCart}
-                                className="w-10 h-10 md:w-12 md:h-12 flex-shrink-0 rounded-full bg-white shadow-lg flex items-center justify-center hover:scale-110 hover:bg-[#be1e2d] hover:text-white transition-all duration-300 group/cart disabled:opacity-50 disabled:cursor-not-allowed relative"
+                                className="w-9 h-9 md:w-12 md:h-12 flex-shrink-0 rounded-full bg-white shadow-lg flex items-center justify-center hover:scale-110 hover:bg-[#be1e2d] hover:text-white transition-all duration-300 group/cart disabled:opacity-50 disabled:cursor-not-allowed relative"
                             >
                                 {isAddingToCart ? (
-                                    <div className="w-4 h-4 border-2 border-[#be1e2d] border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-3.5 h-3.5 md:w-4 md:h-4 border-2 border-[#be1e2d] border-t-transparent rounded-full animate-spin" />
                                 ) : step === 'idle' ? (
                                     <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 text-[#be1e2d] group-hover/cart:text-white transition-colors" />
                                 ) : step === 'size' ? (
