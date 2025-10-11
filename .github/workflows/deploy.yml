@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - staging
   workflow_dispatch:
 
 jobs:
@@ -14,6 +15,28 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Set Environment Variables
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "DEPLOY_ENV=production" >> $GITHUB_ENV
+            echo "DEPLOY_HOST=${{ secrets.HOSTINGER_HOST }}" >> $GITHUB_ENV
+            echo "DEPLOY_USERNAME=${{ secrets.HOSTINGER_USERNAME }}" >> $GITHUB_ENV
+            echo "DEPLOY_SSH_KEY=${{ secrets.HOSTINGER_SSH_KEY }}" >> $GITHUB_ENV
+            echo "DEPLOY_PORT=${{ secrets.HOSTINGER_PORT }}" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=/home/u885878505/domains/avhira.com/avhira" >> $GITHUB_ENV
+            echo "WEB_ROOT=/home/u885878505/domains/avhira.com/public_html" >> $GITHUB_ENV
+            echo "DOMAIN=avhira.com" >> $GITHUB_ENV
+          else
+            echo "DEPLOY_ENV=staging" >> $GITHUB_ENV
+            echo "DEPLOY_HOST=${{ secrets.STAGING_HOST }}" >> $GITHUB_ENV
+            echo "DEPLOY_USERNAME=${{ secrets.STAGING_USERNAME }}" >> $GITHUB_ENV
+            echo "DEPLOY_SSH_KEY=${{ secrets.STAGING_SSH_KEY }}" >> $GITHUB_ENV
+            echo "DEPLOY_PORT=${{ secrets.STAGING_PORT }}" >> $GITHUB_ENV
+            echo "DEPLOY_PATH=/home/u885878505/domains/staging.avhira.com/avhira" >> $GITHUB_ENV
+            echo "WEB_ROOT=/home/u885878505/domains/staging.avhira.com/public_html" >> $GITHUB_ENV
+            echo "DOMAIN=staging.avhira.com" >> $GITHUB_ENV
+          fi
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -56,13 +79,13 @@ jobs:
       - name: Deploy to Hostinger via SSH
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USERNAME }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_PORT }}
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USERNAME }}
+          key: ${{ env.DEPLOY_SSH_KEY }}
+          port: ${{ env.DEPLOY_PORT }}
           script: |
             # Navigate to Laravel application directory
-            cd /home/u885878505/domains/avhira.com/avhira
+            cd ${{ env.DEPLOY_PATH }}
             
             # Create backup of current deployment
             BACKUP_DIR="backups/$(date +%Y%m%d_%H%M%S)"
@@ -85,25 +108,25 @@ jobs:
       - name: Upload Deployment Package
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USERNAME }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_PORT }}
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USERNAME }}
+          key: ${{ env.DEPLOY_SSH_KEY }}
+          port: ${{ env.DEPLOY_PORT }}
           source: "deploy.tar.gz"
-          target: "/home/u885878505/domains/avhira.com/avhira"
+          target: "${{ env.DEPLOY_PATH }}"
 
       - name: Extract and Finalize Deployment
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.HOSTINGER_HOST }}
-          username: ${{ secrets.HOSTINGER_USERNAME }}
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: ${{ secrets.HOSTINGER_PORT }}
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USERNAME }}
+          key: ${{ env.DEPLOY_SSH_KEY }}
+          port: ${{ env.DEPLOY_PORT }}
           command_timeout: 20m
           script: |
             # Define paths
-            LARAVEL_PATH="/home/u885878505/domains/avhira.com/avhira"
-            WEB_ROOT="/home/u885878505/domains/avhira.com/public_html"
+            LARAVEL_PATH="${{ env.DEPLOY_PATH }}"
+            WEB_ROOT="${{ env.WEB_ROOT }}"
             
             # Navigate to Laravel application directory
             cd $LARAVEL_PATH
@@ -195,9 +218,9 @@ jobs:
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Deployment to Hostinger completed successfully!"
-            echo "🌐 Your application is now live at avhira.com"
+            echo "✅ Deployment to ${{ env.DEPLOY_ENV }} completed successfully!"
+            echo "🌐 Your application is now live at ${{ env.DOMAIN }}"
           else
-            echo "❌ Deployment failed. Please check the logs above."
+            echo "❌ Deployment to ${{ env.DEPLOY_ENV }} failed. Please check the logs above."
             echo "📋 Restore from backup if needed using: backups/latest/"
           fi
