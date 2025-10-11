@@ -6,9 +6,9 @@ param(
     [ValidateSet('enable', 'disable', 'status')]
     [string]$Action,
     
-    [string]$Message = "We are performing scheduled maintenance",
     [int]$Retry = 300,
-    [string]$Secret = ""
+    [string]$Secret = "",
+    [switch]$GenerateSecret
 )
 
 # Configuration
@@ -25,40 +25,50 @@ if ($Action -eq 'enable') {
     
     $cmd = "cd $LARAVEL_PATH; php artisan down"
     
-    if ($Message) {
-        $escapedMsg = $Message -replace "'", "'"
-        $cmd += " --message='$escapedMsg'"
-    }
-    
     if ($Retry -gt 0) {
         $cmd += " --retry=$Retry"
     }
     
-    if ($Secret) {
-        $cmd += " --secret='$Secret'"
+    if ($GenerateSecret) {
+        $cmd += " --with-secret"
+    }
+    elseif ($Secret) {
+        $cmd += " --secret=$Secret"
     }
     
-    ssh -i $SSH_KEY -p $SSH_PORT "$SSH_USER@$SSH_HOST" $cmd
+    Write-Host "Running: $cmd" -ForegroundColor Gray
+    $output = ssh -i $SSH_KEY -p $SSH_PORT "$SSH_USER@$SSH_HOST" $cmd
+    Write-Host $output
     
     Write-Host "`nMaintenance mode enabled!" -ForegroundColor Green
     if ($Secret) {
         Write-Host "Bypass URL: https://avhira.com/$Secret" -ForegroundColor Cyan
     }
     Write-Host "Retry after: $Retry seconds" -ForegroundColor Gray
+    Write-Host "`nVisit https://avhira.com to see the maintenance page" -ForegroundColor Yellow
 }
 elseif ($Action -eq 'disable') {
     Write-Host "`nDisabling Maintenance Mode..." -ForegroundColor Green
     
     $cmd = "cd $LARAVEL_PATH; php artisan up"
-    ssh -i $SSH_KEY -p $SSH_PORT "$SSH_USER@$SSH_HOST" $cmd
+    $output = ssh -i $SSH_KEY -p $SSH_PORT "$SSH_USER@$SSH_HOST" $cmd
+    Write-Host $output
     
     Write-Host "`nSite is back online at https://avhira.com" -ForegroundColor Green
 }
 elseif ($Action -eq 'status') {
     Write-Host "`nChecking Maintenance Status..." -ForegroundColor Cyan
     
-    $cmd = "cd $LARAVEL_PATH; if [ -f storage/framework/down ]; then echo 'MAINTENANCE MODE: ENABLED'; cat storage/framework/down; else echo 'MAINTENANCE MODE: DISABLED - Site is live'; fi"
-    ssh -i $SSH_KEY -p $SSH_PORT "$SSH_USER@$SSH_HOST" $cmd
+    $cmd = "cd $LARAVEL_PATH; if [ -f storage/framework/down ]; then echo 'MAINTENANCE MODE: ENABLED'; echo ''; cat storage/framework/down 2>/dev/null | head -20; else echo 'MAINTENANCE MODE: DISABLED - Site is live'; fi"
+    $output = ssh -i $SSH_KEY -p $SSH_PORT "$SSH_USER@$SSH_HOST" $cmd
+    Write-Host $output
 }
 
 Write-Host ""
+
+# Quick help
+if ($Action -eq 'enable') {
+    Write-Host "Quick Commands:" -ForegroundColor Yellow
+    Write-Host "  Disable: .\maintenance.ps1 -Action disable" -ForegroundColor Gray
+    Write-Host "  Status:  .\maintenance.ps1 -Action status" -ForegroundColor Gray
+}
