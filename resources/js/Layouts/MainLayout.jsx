@@ -303,7 +303,7 @@ export default function MainLayout({ children }) {
             <div className="h-32"></div>
 
             {/* Main Content */}
-            <main className="pt-8">
+            <main className="pt-0 sm:pt-8">
                 {children}
             </main>
 

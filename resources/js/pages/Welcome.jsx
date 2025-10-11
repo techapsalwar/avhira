@@ -3,6 +3,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import ProductCard from '@/Components/ProductCard';
+import CardSwap, { Card } from '@/Components/CardSwap';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/Components/GlobalToastProvider';
 
@@ -20,9 +21,11 @@ export default function Welcome({ featuredProducts, categories }) {
     const [years, setYears] = useState(0);
     const [hasAnimated, setHasAnimated] = useState(false);
     const heroImages = [
-        '/images/hero/product-1.jpg',
+        '/images/hero/product-1.png',
         '/images/hero/product-2.png',
         '/images/hero/product-3.png',
+        '/images/hero/product-4.png',
+        '/images/hero/product-5.png',
         
     ];
 
@@ -101,7 +104,7 @@ export default function Welcome({ featuredProducts, categories }) {
             <Head title="Avhira - Premium Clothing Brand" />
             
             {/* Hero Section - Modern Layout Inspired Design */}
-            <section className="relative min-h-[700px] lg:min-h-[900px] flex items-center overflow-hidden -mt-20 sm:-mt-32 lg:-mt-40" 
+            <section className="relative min-h-[700px] lg:min-h-[900px] flex items-center overflow-hidden -mt-32 sm:-mt-32 lg:-mt-40" 
                      style={{ backgroundColor: '#faf5f6' }}>
                 
                 {/* Decorative Pattern Overlay */}
@@ -179,104 +182,30 @@ export default function Welcome({ featuredProducts, categories }) {
                             </div>
                         </div>
 
-                        {/* Right Content - Product Showcase */}
-                        <div className="order-1 lg:order-2 relative animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                            {/* Main Product Card - Smaller & Seamless */}
-                            <div className="relative group">
-                                {/* Subtle Decorative Glow */}
-                                <div className="absolute inset-0 rounded-3xl opacity-10 blur-2xl"
-                                     style={{ backgroundColor: '#be1e2d' }} />
-                                
-                                {/* Main Image Container - Smaller Size */}
-                                <div className="relative rounded-3xl overflow-hidden aspect-[3/4] max-w-[320px] sm:max-w-[380px] lg:max-w-[420px] mx-auto">
-                                    {/* Image Carousel */}
-                                    {heroImages.map((image, index) => (
-                                        <div
-                                            key={index}
-                                            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-                                                index === currentImageIndex
-                                                    ? 'opacity-100 scale-100'
-                                                    : 'opacity-0 scale-105'
-                                            }`}
-                                        >
-                                            <img 
-                                                src={image}
-                                                alt={`Avhira Collection ${index + 1}`}
-                                                className="w-full h-full object-cover"
-                                                style={{
-                                                    filter: 'contrast(1.05) saturate(1.1)',
-                                                }}
-                                                onError={(e) => {
-                                                    // Fallback to placeholder if image doesn't exist
-                                                    e.target.style.display = 'none';
-                                                    if (index === currentImageIndex) {
-                                                        e.target.parentElement.nextElementSibling?.classList.remove('hidden');
-                                                        e.target.parentElement.nextElementSibling?.classList.add('flex');
-                                                    }
-                                                }}
-                                            />
-                                        </div>
-                                    ))}
-                                    
-                                    {/* Placeholder for when images are not yet added */}
-                                    <div className="w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 items-center justify-center hidden absolute inset-0">
-                                        <div className="text-center p-8">
-                                            <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center bg-gradient-to-br from-[#be1e2d] to-[#9a1824]">
-                                                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                            </div>
-                                            <p className="text-gray-600 font-medium text-base">Hero Product Images</p>
-                                            <p className="text-gray-500 text-xs mt-2">Add to: public/images/hero/</p>
-                                            <p className="text-gray-400 text-xs mt-1">product-1.jpg to product-4.jpg</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Subtle Overlay for Blend Effect */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#faf5f6]/20 via-transparent to-[#faf5f6]/10 pointer-events-none" />
-
-                                    {/* Minimalistic Navigation Controls - Inside Image at Bottom */}
-                                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-3 animate-fade-in"
-                                         style={{ animationDelay: '0.8s' }}>
-                                        {/* Previous Button */}
-                                        <button 
-                                            onClick={handlePrevImage}
-                                            className="w-8 h-8 rounded-full bg-white/60 backdrop-blur-md flex items-center justify-center transition-all hover:bg-white/90 hover:scale-110"
-                                            style={{ color: '#be1e2d' }}
-                                        >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
-                                            </svg>
-                                        </button>
-                                        
-                                        {/* Minimalistic Dots Indicator */}
-                                        <div className="flex gap-1.5">
-                                            {heroImages.map((_, index) => (
-                                                <button
-                                                    key={index}
-                                                    onClick={() => setCurrentImageIndex(index)}
-                                                    className={`transition-all duration-300 rounded-full ${
-                                                        index === currentImageIndex
-                                                            ? 'w-6 h-1.5 bg-white'
-                                                            : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/70'
-                                                    }`}
-                                                />
-                                            ))}
-                                        </div>
-                                        
-                                        {/* Next Button */}
-                                        <button 
-                                            onClick={handleNextImage}
-                                            className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110"
-                                            style={{ backgroundColor: '#be1e2d' }}
-                                        >
-                                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                        {/* Right Content - CardSwap Showcase */}
+                        <div className="order-1 lg:order-2 relative animate-fade-in flex items-center justify-center" style={{ animationDelay: '0.2s' }}>
+                            <CardSwap
+                                width={window.innerWidth < 640 ? 280 : window.innerWidth < 1024 ? 350 : 420}
+                                height={window.innerWidth < 640 ? 380 : window.innerWidth < 1024 ? 480 : 560}
+                                cardDistance={65}
+                                verticalDistance={50}
+                                delay={4000}
+                                pauseOnHover={false}
+                                skewAmount={3}
+                                easing="elastic"
+                            >
+                                {heroImages.map((image, index) => (
+                                    <Card key={index} customClass="hero-card">
+                                        <img
+                                            src={image}
+                                            alt={`Avhira Collection ${index + 1}`}
+                                            onError={(e) => {
+                                                e.target.src = 'https://via.placeholder.com/420x560.png?text=No+Image';
+                                            }}
+                                        />
+                                    </Card>
+                                ))}
+                            </CardSwap>
                         </div>
 
                     </div>
@@ -378,8 +307,7 @@ export default function Welcome({ featuredProducts, categories }) {
                                         {/* Circular Overlay */}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                         
-                                        {/* Hover Border Effect */}
-                                        <div className="absolute inset-0 border-4 border-transparent group-hover:border-[#be1e2d] rounded-full transition-colors duration-300" />
+                                        
                                     </div>
                                     
                                     {/* Category Name Below */}
