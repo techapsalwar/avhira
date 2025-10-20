@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
-use App\Models\Category;
+use App\Models\MainCategory;
+use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -14,7 +15,7 @@ class AdminProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with('category');
+        $query = Product::with('subcategory.mainCategory');
 
         // Search functionality
         if ($request->filled('search')) {
@@ -25,9 +26,16 @@ class AdminProductController extends Controller
             });
         }
 
-        // Category filter
-        if ($request->filled('category')) {
-            $query->where('category_id', $request->category);
+        // Subcategory filter
+        if ($request->filled('subcategory')) {
+            $query->where('subcategory_id', $request->subcategory);
+        }
+
+        // Main category filter
+        if ($request->filled('main_category')) {
+            $query->whereHas('subcategory', function($q) use ($request) {
+                $q->where('main_category_id', $request->main_category);
+            });
         }
 
         // Stock filter
@@ -47,21 +55,31 @@ class AdminProductController extends Controller
         }
 
         $products = $query->latest()->paginate(15)->withQueryString();
-        $categories = Category::select('id', 'name')->get();
+        
+        $mainCategories = MainCategory::with('activeSubcategories')
+            ->active()
+            ->ordered()
+            ->get();
+        
+        $subcategories = Subcategory::active()->ordered()->get();
 
         return Inertia::render('Admin/Products/Index', [
             'products' => $products,
-            'categories' => $categories,
-            'filters' => $request->only(['search', 'category', 'stock', 'featured']),
+            'mainCategories' => $mainCategories,
+            'subcategories' => $subcategories,
+            'filters' => $request->only(['search', 'subcategory', 'main_category', 'stock', 'featured']),
         ]);
     }
 
     public function create()
     {
-        $categories = Category::select('id', 'name')->get();
+        $mainCategories = MainCategory::with('activeSubcategories')
+            ->active()
+            ->ordered()
+            ->get();
 
         return Inertia::render('Admin/Products/Create', [
-            'categories' => $categories,
+            'mainCategories' => $mainCategories,
         ]);
     }
 
@@ -69,7 +87,7 @@ class AdminProductController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
+            'subcategory_id' => 'required|exists:subcategories,id',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0|lt:price',
@@ -84,7 +102,7 @@ class AdminProductController extends Controller
         ]);
 
         $data = $request->only([
-            'name', 'category_id', 'description', 'price', 'sale_price',
+            'name', 'subcategory_id', 'description', 'price', 'sale_price',
             'stock_quantity', 'sku', 'video_url'
         ]);
         
@@ -120,7 +138,7 @@ class AdminProductController extends Controller
 
     public function show($id)
     {
-        $product = Product::with('category')->findOrFail($id);
+        $product = Product::with('subcategory.mainCategory')->findOrFail($id);
         
         return Inertia::render('Admin/Products/Show', [
             'product' => $product,
@@ -129,8 +147,12 @@ class AdminProductController extends Controller
 
     public function edit($id)
     {
-        $product = Product::with('category')->findOrFail($id);
-        $categories = Category::select('id', 'name')->get();
+        $product = Product::with('subcategory.mainCategory')->findOrFail($id);
+        
+        $mainCategories = MainCategory::with('activeSubcategories')
+            ->active()
+            ->ordered()
+            ->get();
         
         // Parse JSON fields for editing
         $product->images = is_string($product->images) ? json_decode($product->images, true) : $product->images;
@@ -138,7 +160,7 @@ class AdminProductController extends Controller
         
         return Inertia::render('Admin/Products/Edit', [
             'product' => $product,
-            'categories' => $categories,
+            'mainCategories' => $mainCategories,
         ]);
     }
 
@@ -148,7 +170,7 @@ class AdminProductController extends Controller
         
         $request->validate([
             'name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
+            'subcategory_id' => 'required|exists:subcategories,id',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0|lt:price',
@@ -164,7 +186,7 @@ class AdminProductController extends Controller
         ]);
 
         $data = $request->only([
-            'name', 'category_id', 'description', 'price', 'sale_price',
+            'name', 'subcategory_id', 'description', 'price', 'sale_price',
             'stock_quantity', 'sku', 'video_url'
         ]);
         

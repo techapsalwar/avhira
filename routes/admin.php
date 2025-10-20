@@ -21,13 +21,21 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
     Route::post('/users/{user}/toggle-admin', [AdminUserController::class, 'toggleAdmin'])->name('admin.users.toggle-admin');
     
-    // Categories management
+    // Main Categories management
+    Route::get('/categories/main', [AdminCategoryController::class, 'indexMain'])->name('admin.categories.main.index');
+    Route::get('/categories/main/create', [AdminCategoryController::class, 'createMain'])->name('admin.categories.main.create');
+    Route::post('/categories/main', [AdminCategoryController::class, 'storeMain'])->name('admin.categories.main.store');
+    Route::get('/categories/main/{mainCategory}/edit', [AdminCategoryController::class, 'editMain'])->name('admin.categories.main.edit');
+    Route::put('/categories/main/{mainCategory}', [AdminCategoryController::class, 'updateMain'])->name('admin.categories.main.update');
+    Route::delete('/categories/main/{mainCategory}', [AdminCategoryController::class, 'destroyMain'])->name('admin.categories.main.destroy');
+    
+    // Subcategories management
     Route::get('/categories', [AdminCategoryController::class, 'index'])->name('admin.categories.index');
     Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('admin.categories.create');
     Route::post('/categories', [AdminCategoryController::class, 'store'])->name('admin.categories.store');
-    Route::get('/categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('admin.categories.edit');
-    Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('admin.categories.update');
-    Route::delete('/categories/{category}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
+    Route::get('/categories/{subcategory}/edit', [AdminCategoryController::class, 'edit'])->name('admin.categories.edit');
+    Route::put('/categories/{subcategory}', [AdminCategoryController::class, 'update'])->name('admin.categories.update');
+    Route::delete('/categories/{subcategory}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
     
     // Products management
     Route::get('/products', [AdminProductController::class, 'index'])->name('admin.products.index');

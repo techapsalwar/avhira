@@ -4,10 +4,11 @@ import { Head, Link, useForm, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { useState } from 'react';
 
-export default function EditProduct({ product, categories }) {
+export default function EditProduct({ product, mainCategories }) {
     const { data, setData, post, processing, errors } = useForm({
-        name: product.name || '',
-        category_id: product.category_id || '',
+        name: product.name || '', 
+        main_category_id: product.subcategory?.main_category_id || '',
+        subcategory_id: product.subcategory_id || '',
         description: product.description || '',
         price: product.price || '',
         sale_price: product.sale_price || '',
@@ -23,6 +24,15 @@ export default function EditProduct({ product, categories }) {
 
     const [newImagePreviews, setNewImagePreviews] = useState([]);
     const [availableSizeOptions] = useState(['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']);
+    const [selectedMainCategory, setSelectedMainCategory] = useState(
+        mainCategories?.find(cat => cat.id === product.subcategory?.main_category_id)
+    );
+    const [discountPercentage, setDiscountPercentage] = useState(() => {
+        if (product.sale_price && product.price) {
+            return ((1 - parseFloat(product.sale_price) / parseFloat(product.price)) * 100).toFixed(2);
+        }
+        return '';
+    });
 
     const handleNewImageChange = (e) => {
         const files = Array.from(e.target.files);
@@ -46,6 +56,34 @@ export default function EditProduct({ product, categories }) {
         }
     };
 
+    const handlePriceChange = (newPrice) => {
+        setData('price', newPrice);
+        if (discountPercentage && newPrice) {
+            const calculatedSalePrice = (parseFloat(newPrice) * (1 - parseFloat(discountPercentage) / 100)).toFixed(2);
+            setData('sale_price', calculatedSalePrice);
+        }
+    };
+
+    const handleDiscountChange = (discount) => {
+        setDiscountPercentage(discount);
+        if (discount && data.price) {
+            const calculatedSalePrice = (parseFloat(data.price) * (1 - parseFloat(discount) / 100)).toFixed(2);
+            setData('sale_price', calculatedSalePrice);
+        } else if (!discount) {
+            setData('sale_price', '');
+        }
+    };
+
+    const handleSalePriceChange = (salePrice) => {
+        setData('sale_price', salePrice);
+        if (salePrice && data.price) {
+            const calculatedDiscount = ((1 - parseFloat(salePrice) / parseFloat(data.price)) * 100).toFixed(2);
+            setDiscountPercentage(calculatedDiscount >= 0 ? calculatedDiscount : '0');
+        } else if (!salePrice) {
+            setDiscountPercentage('');
+        }
+    };
+
     const submit = (e) => {
         e.preventDefault();
         post(`/admin/products/${product.id}`, {
@@ -61,6 +99,22 @@ export default function EditProduct({ product, categories }) {
             <div className="max-w-4xl">
                 <div className="bg-white rounded-2xl shadow-md p-8">
                     <form onSubmit={submit} className="space-y-6">
+
+                        {/* SKU */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                SKU Code
+                            </label>
+                            <input
+                                type="text"
+                                value={data.sku}
+                                onChange={(e) => setData('sku', e.target.value)}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
+                            />
+                            {errors.sku && <p className="mt-1 text-sm text-red-600">{errors.sku}</p>}
+                        </div>
+
+
                         {/* Basic Info */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -78,21 +132,46 @@ export default function EditProduct({ product, categories }) {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Category *
+                                    Main Category *
                                 </label>
                                 <select
-                                    value={data.category_id}
-                                    onChange={(e) => setData('category_id', e.target.value)}
+                                    value={data.main_category_id}
+                                    onChange={(e) => {
+                                        const mainCatId = e.target.value;
+                                        setData('main_category_id', mainCatId);
+                                        setData('subcategory_id', ''); // Reset subcategory
+                                        setSelectedMainCategory(mainCategories?.find(cat => cat.id === parseInt(mainCatId)));
+                                    }}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
                                 >
-                                    <option value="">Select Category</option>
-                                    {categories.map(cat => (
+                                    <option value="">Select Main Category</option>
+                                    {mainCategories?.map(cat => (
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
                                 </select>
-                                {errors.category_id && <p className="mt-1 text-sm text-red-600">{errors.category_id}</p>}
+                                {errors.main_category_id && <p className="mt-1 text-sm text-red-600">{errors.main_category_id}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Subcategory *
+                                </label>
+                                <select
+                                    value={data.subcategory_id}
+                                    onChange={(e) => setData('subcategory_id', e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
+                                    disabled={!selectedMainCategory}
+                                >
+                                    <option value="">Select Subcategory</option>
+                                    {selectedMainCategory?.active_subcategories?.map(sub => (
+                                        <option key={sub.id} value={sub.id}>{sub.name}</option>
+                                    ))}
+                                </select>
+                                {errors.subcategory_id && <p className="mt-1 text-sm text-red-600">{errors.subcategory_id}</p>}
                             </div>
                         </div>
+
+                        
 
                         {/* Description */}
                         <div>
@@ -109,7 +188,7 @@ export default function EditProduct({ product, categories }) {
                         </div>
 
                         {/* Pricing */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Regular Price *
@@ -118,10 +197,27 @@ export default function EditProduct({ product, categories }) {
                                     type="number"
                                     step="0.01"
                                     value={data.price}
-                                    onChange={(e) => setData('price', e.target.value)}
+                                    onChange={(e) => handlePriceChange(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
                                 />
                                 {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Discount %
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max="100"
+                                    value={discountPercentage}
+                                    onChange={(e) => handleDiscountChange(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
+                                    placeholder="0"
+                                />
+                                <p className="mt-1 text-xs text-gray-500">Auto-calculates sale price</p>
                             </div>
 
                             <div>
@@ -132,7 +228,7 @@ export default function EditProduct({ product, categories }) {
                                     type="number"
                                     step="0.01"
                                     value={data.sale_price}
-                                    onChange={(e) => setData('sale_price', e.target.value)}
+                                    onChange={(e) => handleSalePriceChange(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
                                 />
                                 {errors.sale_price && <p className="mt-1 text-sm text-red-600">{errors.sale_price}</p>}
@@ -152,19 +248,7 @@ export default function EditProduct({ product, categories }) {
                             </div>
                         </div>
 
-                        {/* SKU */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                SKU
-                            </label>
-                            <input
-                                type="text"
-                                value={data.sku}
-                                onChange={(e) => setData('sku', e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
-                            />
-                            {errors.sku && <p className="mt-1 text-sm text-red-600">{errors.sku}</p>}
-                        </div>
+                        
 
                         {/* Available Sizes */}
                         <div>

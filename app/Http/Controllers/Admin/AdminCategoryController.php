@@ -3,87 +3,210 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
+use App\Models\MainCategory;
+use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class AdminCategoryController extends Controller
 {
-    public function index(Request $request)
+    // Main Categories Management
+    public function indexMain(Request $request)
     {
-        $query = Category::withCount('products');
+        $query = MainCategory::withCount('subcategories');
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%')
                   ->orWhere('description', 'like', '%' . $request->search . '%');
         }
 
-        $categories = $query->latest()->paginate(15)->withQueryString();
+        $mainCategories = $query->ordered()->paginate(15)->withQueryString();
+
+        return Inertia::render('Admin/Categories/MainIndex', [
+            'mainCategories' => $mainCategories,
+            'filters' => $request->only(['search']),
+        ]);
+    }
+
+    public function createMain()
+    {
+        return Inertia::render('Admin/Categories/CreateMain');
+    }
+
+    public function storeMain(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:main_categories,name',
+            'description' => 'nullable|string',
+            'display_order' => 'nullable|integer|min:0',
+        ]);
+
+        $data = $request->all();
+        $data['slug'] = Str::slug($request->name);
+        $data['is_active'] = $request->get('is_active', true);
+
+        MainCategory::create($data);
+
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Main category created successfully.');
+    }
+
+    public function editMain(MainCategory $mainCategory)
+    {
+        return Inertia::render('Admin/Categories/EditMain', [
+            'mainCategory' => $mainCategory,
+        ]);
+    }
+
+    public function updateMain(Request $request, MainCategory $mainCategory)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:main_categories,name,' . $mainCategory->id,
+            'description' => 'nullable|string',
+            'display_order' => 'nullable|integer|min:0',
+        ]);
+
+        $data = $request->all();
+        
+        if ($request->name !== $mainCategory->name) {
+            $data['slug'] = Str::slug($request->name);
+        }
+
+        $mainCategory->update($data);
+
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Main category updated successfully.');
+    }
+
+    public function destroyMain(MainCategory $mainCategory)
+    {
+        // Check if main category has subcategories
+        if ($mainCategory->subcategories()->count() > 0) {
+            return redirect()->route('admin.categories.index')
+                ->with('error', 'Cannot delete main category with subcategories.');
+        }
+
+        $mainCategory->delete();
+
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Main category deleted successfully.');
+    }
+
+    // Subcategories Management
+    public function index(Request $request)
+    {
+        $query = Subcategory::with('mainCategory')->withCount('products');
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('main_category')) {
+            $query->where('main_category_id', $request->main_category);
+        }
+
+        $subcategories = $query->ordered()->paginate(15)->withQueryString();
+        $mainCategories = MainCategory::withCount('subcategories')->active()->ordered()->get();
 
         return Inertia::render('Admin/Categories/Index', [
-            'categories' => $categories,
-            'filters' => $request->only(['search']),
+            'subcategories' => $subcategories,
+            'mainCategories' => $mainCategories,
+            'filters' => $request->only(['search', 'main_category']),
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('Admin/Categories/Create');
+        $mainCategories = MainCategory::active()->ordered()->get();
+
+        return Inertia::render('Admin/Categories/Create', [
+            'mainCategories' => $mainCategories,
+        ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name',
+            'name' => 'required|string|max:255',
+            'main_category_id' => 'required|exists:main_categories,id',
             'description' => 'nullable|string',
+            'display_order' => 'nullable|integer|min:0',
         ]);
 
         $data = $request->all();
         $data['slug'] = Str::slug($request->name);
+        $data['is_active'] = $request->get('is_active', true);
 
-        Category::create($data);
+        // Validate unique name within main category
+        $exists = Subcategory::where('main_category_id', $request->main_category_id)
+            ->where('name', $request->name)
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors(['name' => 'This subcategory name already exists in the selected main category.']);
+        }
+
+        Subcategory::create($data);
 
         return redirect()->route('admin.categories.index')
-            ->with('success', 'Category created successfully.');
+            ->with('success', 'Subcategory created successfully.');
     }
 
-    public function edit(Category $category)
+    public function edit(Subcategory $subcategory)
     {
+        $subcategory->load('mainCategory');
+        $mainCategories = MainCategory::active()->ordered()->get();
+
         return Inertia::render('Admin/Categories/Edit', [
-            'category' => $category,
+            'subcategory' => $subcategory,
+            'mainCategories' => $mainCategories,
         ]);
     }
 
-    public function update(Request $request, Category $category)
+    public function update(Request $request, Subcategory $subcategory)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'name' => 'required|string|max:255',
+            'main_category_id' => 'required|exists:main_categories,id',
             'description' => 'nullable|string',
+            'display_order' => 'nullable|integer|min:0',
         ]);
 
         $data = $request->all();
         
-        if ($request->name !== $category->name) {
+        // Validate unique name within main category (excluding current)
+        $exists = Subcategory::where('main_category_id', $request->main_category_id)
+            ->where('name', $request->name)
+            ->where('id', '!=', $subcategory->id)
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors(['name' => 'This subcategory name already exists in the selected main category.']);
+        }
+        
+        if ($request->name !== $subcategory->name) {
             $data['slug'] = Str::slug($request->name);
         }
 
-        $category->update($data);
+        $subcategory->update($data);
 
         return redirect()->route('admin.categories.index')
-            ->with('success', 'Category updated successfully.');
+            ->with('success', 'Subcategory updated successfully.');
     }
 
-    public function destroy(Category $category)
+    public function destroy(Subcategory $subcategory)
     {
-        // Check if category has products
-        if ($category->products()->count() > 0) {
-            return back()->with('error', 'Cannot delete category with existing products.');
+        // Check if subcategory has products
+        if ($subcategory->products()->count() > 0) {
+            return redirect()->route('admin.categories.index')
+                ->with('error', 'Cannot delete subcategory with existing products.');
         }
 
-        $category->delete();
+        $subcategory->delete();
 
         return redirect()->route('admin.categories.index')
-            ->with('success', 'Category deleted successfully.');
+            ->with('success', 'Subcategory deleted successfully.');
     }
 }

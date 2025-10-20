@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Order;
-use App\Models\Category;
+use App\Models\MainCategory;
+use App\Models\Subcategory;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -19,7 +20,9 @@ class AdminController extends Controller
         $stats = [
             'total_users' => User::count(),
             'total_products' => Product::count(),
-            'total_categories' => Category::count(),
+            'total_categories' => MainCategory::count() + Subcategory::count(),
+            'total_main_categories' => MainCategory::count(),
+            'total_subcategories' => Subcategory::count(),
             'total_orders' => Order::count(),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'processing_orders' => Order::where('status', 'processing')->count(),
@@ -55,11 +58,12 @@ class AdminController extends Controller
             ->limit(10)
             ->get();
 
-        // Category-wise sales
-        $categorySales = Category::select('categories.name', DB::raw('SUM(order_items.quantity) as total_sold'))
-            ->join('products', 'categories.id', '=', 'products.category_id')
+        // Category-wise sales (by main category)
+        $categorySales = MainCategory::select('main_categories.name', DB::raw('SUM(order_items.quantity) as total_sold'))
+            ->join('subcategories', 'main_categories.id', '=', 'subcategories.main_category_id')
+            ->join('products', 'subcategories.id', '=', 'products.subcategory_id')
             ->join('order_items', 'products.id', '=', 'order_items.product_id')
-            ->groupBy('categories.id', 'categories.name')
+            ->groupBy('main_categories.id', 'main_categories.name')
             ->orderBy('total_sold', 'desc')
             ->get();
 

@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Category;
+use App\Models\MainCategory;
+use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -14,12 +15,15 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('category')->latest()->get();
-        $categories = Category::all();
+        $products = Product::with('subcategory.mainCategory')->latest()->get();
+        $mainCategories = MainCategory::with('activeSubcategories')
+            ->active()
+            ->ordered()
+            ->get();
 
         return Inertia::render('Products/Index', [
             'products' => $products,
-            'categories' => $categories,
+            'categories' => $mainCategories,
         ]);
     }
 
@@ -28,7 +32,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load('category');
+        $product->load('subcategory.mainCategory');
         
         return Inertia::render('Products/Show', [
             'product' => $product,

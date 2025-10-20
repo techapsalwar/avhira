@@ -17,7 +17,8 @@ Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name
 
 // Categories
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
-Route::get('/categories/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
+Route::get('/categories/{mainCategory:slug}', [CategoryController::class, 'showMain'])->name('categories.main.show');
+Route::get('/categories/{mainCategory:slug}/{subcategory:slug}', [CategoryController::class, 'showSubcategory'])->name('categories.subcategory.show');
 
 // Cart
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');

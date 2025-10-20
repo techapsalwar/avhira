@@ -11,15 +11,16 @@ const formatPrice = (price) => {
     }).format(price);
 };
 
-export default function ProductsIndex({ products, categories, filters }) {
+export default function ProductsIndex({ products, mainCategories, subcategories, filters }) {
     const [search, setSearch] = useState(filters.search || '');
-    const [category, setCategory] = useState(filters.category || '');
+    const [mainCategory, setMainCategory] = useState(filters.main_category || '');
+    const [subcategory, setSubcategory] = useState(filters.subcategory || '');
     const [stock, setStock] = useState(filters.stock || '');
     const [featured, setFeatured] = useState(filters.featured || '');
 
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get('/admin/products', { search, category, stock, featured }, { preserveState: true });
+        router.get('/admin/products', { search, main_category: mainCategory, subcategory, stock, featured }, { preserveState: true });
     };
 
     const handleDelete = (id, name) => {
@@ -51,14 +52,30 @@ export default function ProductsIndex({ products, categories, filters }) {
                         />
                         
                         <select
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
+                            value={mainCategory}
+                            onChange={(e) => {
+                                setMainCategory(e.target.value);
+                                setSubcategory(''); // Reset subcategory when main category changes
+                            }}
                             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
                         >
-                            <option value="">All Categories</option>
-                            {categories.map(cat => (
+                            <option value="">All Main Categories</option>
+                            {mainCategories?.map(cat => (
                                 <option key={cat.id} value={cat.id}>{cat.name}</option>
                             ))}
+                        </select>
+
+                        <select
+                            value={subcategory}
+                            onChange={(e) => setSubcategory(e.target.value)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
+                        >
+                            <option value="">All Subcategories</option>
+                            {subcategories
+                                ?.filter(sub => !mainCategory || sub.main_category_id === parseInt(mainCategory))
+                                ?.map(sub => (
+                                    <option key={sub.id} value={sub.id}>{sub.name}</option>
+                                ))}
                         </select>
 
                         <select
@@ -137,7 +154,9 @@ export default function ProductsIndex({ products, categories, filters }) {
 
                                 <div className="p-4">
                                     <h3 className="font-semibold text-gray-900 mb-1 truncate">{product.name}</h3>
-                                    <p className="text-sm text-gray-500 mb-2">{product.category?.name}</p>
+                                    <p className="text-sm text-gray-500 mb-2">
+                                        {product.subcategory?.main_category?.name} › {product.subcategory?.name}
+                                    </p>
                                     
                                     <div className="flex items-center gap-2 mb-3">
                                         {product.sale_price ? (

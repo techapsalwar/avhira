@@ -18,7 +18,7 @@ class Product extends Model
     protected $fillable = [
         'name',
         'slug',
-        'category_id',
+        'subcategory_id',
         'description',
         'price',
         'sale_price',
@@ -81,11 +81,34 @@ class Product extends Model
     }
 
     /**
-     * Get the category that owns the Product.
+     * Get the subcategory that owns the Product.
+     */
+    public function subcategory()
+    {
+        return $this->belongsTo(Subcategory::class);
+    }
+
+    /**
+     * Get the main category through subcategory
+     */
+    public function mainCategory()
+    {
+        return $this->hasOneThrough(
+            MainCategory::class,
+            Subcategory::class,
+            'id', // Foreign key on subcategories table
+            'id', // Foreign key on main_categories table
+            'subcategory_id', // Local key on products table
+            'main_category_id' // Local key on subcategories table
+        );
+    }
+
+    /**
+     * Alias for backward compatibility (deprecated, use subcategory())
      */
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->subcategory();
     }
 
     /**

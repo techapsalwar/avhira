@@ -2,33 +2,59 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Models\MainCategory;
+use App\Models\Subcategory;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
     /**
-     * Display a listing of categories.
+     * Display a listing of main categories with subcategories.
      */
     public function index()
     {
-        $categories = Category::withCount('products')->get();
+        $mainCategories = MainCategory::with(['subcategories' => function($query) {
+            $query->withCount('products')->active()->ordered();
+        }])
+        ->active()
+        ->ordered()
+        ->get();
 
         return Inertia::render('Categories/Index', [
-            'categories' => $categories,
+            'categories' => $mainCategories,
         ]);
     }
 
     /**
-     * Display the specified category with its products.
+     * Display the specified main category with subcategories.
      */
-    public function show(Category $category)
+    public function showMain(MainCategory $mainCategory)
     {
-        $category->load('products');
+        $mainCategory->load(['subcategories' => function($query) {
+            $query->withCount('products')->active()->ordered();
+        }]);
+
+        // Get all products from all subcategories under this main category
+        $products = $mainCategory->getAllProducts();
+
+        return Inertia::render('Categories/ShowMain', [
+            'mainCategory' => $mainCategory,
+            'products' => $products,
+            'totalProducts' => $products->count(),
+        ]);
+    }
+
+    /**
+     * Display the specified subcategory with its products.
+     */
+    public function showSubcategory(Subcategory $subcategory)
+    {
+        $subcategory->load(['products', 'mainCategory']);
 
         return Inertia::render('Categories/Show', [
-            'category' => $category,
-            'products' => $category->products,
+            'category' => $subcategory,
+            'mainCategory' => $subcategory->mainCategory,
+            'products' => $subcategory->products,
         ]);
     }
 }

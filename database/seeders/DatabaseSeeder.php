@@ -3,7 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\Category;
+use App\Models\MainCategory;
+use App\Models\Subcategory;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -25,42 +26,12 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Create Categories
-        $categories = [
-            [
-                'name' => 'Men Shirts',
-                'description' => 'Comfortable and stylish shirts for everyday wear',
-            ],
-            [
-                'name' => 'Short Kurta',
-                'description' => 'Formal and casual kurtas for all occasions',
-            ],
-            [
-                'name' => 'Women Kurtis',
-                'description' => 'Premium kurtis with elegant designs for all occasions',
-            ],
-            [
-                'name' => 'Peplum Tops',
-                'description' => 'Trendy peplum tops for any occasion, style and warmth',
-            ],
-            [
-                'name' => 'Sarees',
-                'description' => 'Elegant sarees for special occasions and festivities',
-            ],
-        ];
-
-        foreach ($categories as $categoryData) {
-            $category = Category::firstOrCreate(
-                ['slug' => \Illuminate\Support\Str::slug($categoryData['name'])],
-                $categoryData
-            );
-
-            // Create products for each category
-            $this->createProductsForCategory($category);
-        }
+        // Use SeparateTablesSeeder to create categories and products
+        $this->call(SeparateTablesSeeder::class);
     }
 
-    private function createProductsForCategory($category)
+    // Deprecated - kept for reference
+    private function createProductsForCategoryOld($category)
     {
         $products = [];
 

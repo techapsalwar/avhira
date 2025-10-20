@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Category;
+use App\Models\MainCategory;
 use Inertia\Inertia;
 
 class WelcomeController extends Controller
@@ -13,17 +13,20 @@ class WelcomeController extends Controller
      */
     public function index()
     {
-        $featuredProducts = Product::with('category')
+        $featuredProducts = Product::with('subcategory.mainCategory')
             ->where('is_featured', true)
             ->latest()
             ->take(8)
             ->get();
 
-        $categories = Category::all();
+        $mainCategories = MainCategory::with('activeSubcategories')
+            ->active()
+            ->ordered()
+            ->get();
 
         return Inertia::render('Welcome', [
             'featuredProducts' => $featuredProducts,
-            'categories' => $categories,
+            'categories' => $mainCategories, // Keeping same key for backward compatibility
         ]);
     }
 }

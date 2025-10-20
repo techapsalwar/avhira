@@ -1,0 +1,106 @@
+# Production .gitignore - Main Branch Only
+# This excludes development files from production deployments
+
+# ===================================
+# Laravel Essentials (Keep These)
+# ===================================
+/.phpunit.cache
+/bootstrap/ssr
+/node_modules
+/public/hot
+/public/storage
+/resources/js/actions
+/resources/js/routes
+/resources/js/wayfinder
+/storage/*.key
+/storage/pail
+/vendor
+.env
+.env.backup
+.env.production
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/auth.json
+
+# ===================================
+# Development Files (Exclude from Main)
+# ===================================
+
+# Documentation & Guides
+*.md
+!README.md
+/docs/
+
+# Test Files
+/tests/
+phpunit.xml
+.phpunit.result.cache
+Pest.php
+
+# Development Scripts
+test-*.php
+deploy-*.sh
+*.test.js
+
+# IDE & Editor Files
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+.phpactor.json
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Git Files
+.git/
+.gitattributes
+
+# GitHub Workflows (for developer branch)
+# Uncomment to exclude from main if you want workflows only in developer
+# .github/
+
+# Database Development Files
+database/seeders/DatabaseSeeder.php
+# Keep migrations but exclude test seeders
+
+# Temporary Files
+*.log
+*.tmp
+*.temp
+storage/logs/*
+!storage/logs/.gitkeep
+
+# Build artifacts (will be rebuilt on server)
+/public/build/*
+!public/build/.gitkeep
+
+# Environment Files
+.env.*
+!.env.example
+
+# Package Lock Files (can be regenerated)
+# Uncomment if you want to exclude these
+# composer.lock
+# package-lock.json
+
+# envo-earth folder (if it's a separate project)
+/envo-earth/
+
+# Cache Files
+bootstrap/cache/*
+!bootstrap/cache/.gitkeep
+storage/framework/cache/*
+!storage/framework/cache/.gitkeep
+storage/framework/sessions/*
+!storage/framework/sessions/.gitkeep
+storage/framework/views/*
+!storage/framework/views/.gitkeep
+
+# Backup Files
+*.bak
+*.backup

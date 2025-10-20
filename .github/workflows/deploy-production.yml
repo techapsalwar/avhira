@@ -1,0 +1,247 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual deployment
+
+jobs:
+  deploy:
+    name: Deploy to Production Server
+    runs-on: ubuntu-latest
+    
+    steps:
+      # =============================================================================
+      # Checkout Code
+      # =============================================================================
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better logging
+
+      # =============================================================================
+      # Setup Environment
+      # =============================================================================
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, dom, filter, gd, json, zip
+          tools: composer:v2
+          coverage: none
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # =============================================================================
+      # Cache Dependencies
+      # =============================================================================
+      - name: 📦 Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            composer-
+
+      - name: 📦 Cache Node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            node-
+
+      # =============================================================================
+      # Install Dependencies
+      # =============================================================================
+      - name: 🔧 Install Composer dependencies
+        run: |
+          composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+          echo "✓ Composer dependencies installed"
+
+      - name: 🔧 Install Node dependencies
+        run: |
+          npm ci
+          echo "✓ Node dependencies installed"
+
+      # =============================================================================
+      # Build Assets
+      # =============================================================================
+      - name: 🏗️ Build frontend assets
+        run: |
+          npm run build
+          echo "✓ Frontend assets built"
+
+      # =============================================================================
+      # Prepare Deployment
+      # =============================================================================
+      - name: 📋 Create deployment summary
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Author:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Recent Commits" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          git log --oneline -5 >> $GITHUB_STEP_SUMMARY
+
+      # =============================================================================
+      # Deploy to Server via SSH
+      # =============================================================================
+      - name: 🚀 Deploy to production server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: ${{ secrets.PRODUCTION_PORT || 22 }}
+          script: |
+            set -e
+            
+            echo "🔄 Starting deployment..."
+            
+            # Navigate to project directory
+            cd ${{ secrets.PRODUCTION_PATH }}
+            
+            # Enable maintenance mode
+            php artisan down --message="Upgrading application, please wait..." || true
+            echo "✓ Maintenance mode enabled"
+            
+            # Backup database
+            BACKUP_DIR="$HOME/backups/$(date +%Y%m%d_%H%M%S)"
+            mkdir -p "$BACKUP_DIR"
+            mysqldump -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_DATABASE }} > "$BACKUP_DIR/database.sql" || echo "⚠ Database backup failed"
+            echo "✓ Database backup created"
+            
+            # Pull latest changes
+            git fetch origin main
+            git reset --hard origin/main
+            echo "✓ Code updated"
+            
+            # Install PHP dependencies (production only)
+            composer install --no-dev --optimize-autoloader --no-interaction
+            echo "✓ Composer dependencies updated"
+            
+            # Install Node dependencies and build
+            npm ci
+            npm run build
+            echo "✓ Frontend assets rebuilt"
+            
+            # Run database migrations
+            php artisan migrate --force
+            echo "✓ Database migrations completed"
+            
+            # Clear and optimize caches
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan event:cache
+            php artisan optimize
+            echo "✓ Caches optimized"
+            
+            # Fix permissions
+            chmod -R 775 storage bootstrap/cache
+            chown -R www-data:www-data storage bootstrap/cache
+            echo "✓ Permissions fixed"
+            
+            # Disable maintenance mode
+            php artisan up
+            echo "✓ Maintenance mode disabled"
+            
+            # Restart services
+            sudo systemctl restart php8.2-fpm || echo "⚠ PHP-FPM restart failed"
+            sudo systemctl reload nginx || echo "⚠ Nginx reload failed"
+            echo "✓ Services restarted"
+            
+            echo "🎉 Deployment completed successfully!"
+
+      # =============================================================================
+      # Post-Deployment Health Check
+      # =============================================================================
+      - name: 🏥 Health check
+        run: |
+          echo "Waiting for application to start..."
+          sleep 10
+          
+          # Check if site is responding (replace with your actual URL)
+          if curl -f -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_URL }} | grep -q "200"; then
+            echo "✓ Site is responding correctly"
+            echo "### ✅ Health Check Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠ Site may not be responding correctly"
+            echo "### ⚠️ Health Check Warning" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # =============================================================================
+      # Notification (Optional)
+      # =============================================================================
+      - name: 📧 Send deployment notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            Deployment to production ${{ job.status }}
+            Commit: ${{ github.event.head_commit.message }}
+            Author: ${{ github.actor }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        continue-on-error: true
+
+      # =============================================================================
+      # Deployment Failed Rollback
+      # =============================================================================
+      - name: 🔄 Rollback on failure
+        if: failure()
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: ${{ secrets.PRODUCTION_PORT || 22 }}
+          script: |
+            set -e
+            
+            echo "❌ Deployment failed, attempting rollback..."
+            
+            cd ${{ secrets.PRODUCTION_PATH }}
+            
+            # Disable maintenance mode
+            php artisan up || true
+            
+            # Reset to previous commit
+            git reset --hard HEAD~1
+            
+            # Restore composer dependencies
+            composer install --no-dev --optimize-autoloader --no-interaction
+            
+            # Clear caches
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
+            php artisan cache:clear
+            
+            # Restart services
+            sudo systemctl restart php8.2-fpm || true
+            sudo systemctl reload nginx || true
+            
+            echo "⚠ Rollback completed. Please check the application."
+
+      - name: ❌ Deployment failed
+        if: failure()
+        run: |
+          echo "### ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Please check the logs and consider rolling back manually if needed." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Rollback command:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "ssh user@server 'cd /path/to/project && git reset --hard HEAD~1 && php artisan config:clear && php artisan up'" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

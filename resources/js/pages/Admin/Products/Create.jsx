@@ -4,10 +4,11 @@ import { Head, Link, useForm, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { useState } from 'react';
 
-export default function CreateProduct({ categories }) {
+export default function CreateProduct({ mainCategories }) {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
-        category_id: '',
+        main_category_id: '',
+        subcategory_id: '',
         description: '',
         price: '',
         sale_price: '',
@@ -21,6 +22,8 @@ export default function CreateProduct({ categories }) {
 
     const [imagePreviews, setImagePreviews] = useState([]);
     const [availableSizeOptions] = useState(['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']);
+    const [selectedMainCategory, setSelectedMainCategory] = useState(null);
+    const [discountPercentage, setDiscountPercentage] = useState('');
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
@@ -37,6 +40,34 @@ export default function CreateProduct({ categories }) {
             setData('available_sizes', currentSizes.filter(s => s !== size));
         } else {
             setData('available_sizes', [...currentSizes, size]);
+        }
+    };
+
+    const handlePriceChange = (newPrice) => {
+        setData('price', newPrice);
+        if (discountPercentage && newPrice) {
+            const calculatedSalePrice = (parseFloat(newPrice) * (1 - parseFloat(discountPercentage) / 100)).toFixed(2);
+            setData('sale_price', calculatedSalePrice);
+        }
+    };
+
+    const handleDiscountChange = (discount) => {
+        setDiscountPercentage(discount);
+        if (discount && data.price) {
+            const calculatedSalePrice = (parseFloat(data.price) * (1 - parseFloat(discount) / 100)).toFixed(2);
+            setData('sale_price', calculatedSalePrice);
+        } else if (!discount) {
+            setData('sale_price', '');
+        }
+    };
+
+    const handleSalePriceChange = (salePrice) => {
+        setData('sale_price', salePrice);
+        if (salePrice && data.price) {
+            const calculatedDiscount = ((1 - parseFloat(salePrice) / parseFloat(data.price)) * 100).toFixed(2);
+            setDiscountPercentage(calculatedDiscount >= 0 ? calculatedDiscount : '0');
+        } else if (!salePrice) {
+            setDiscountPercentage('');
         }
     };
 
@@ -73,19 +104,42 @@ export default function CreateProduct({ categories }) {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Category *
+                                    Main Category *
                                 </label>
                                 <select
-                                    value={data.category_id}
-                                    onChange={(e) => setData('category_id', e.target.value)}
+                                    value={data.main_category_id}
+                                    onChange={(e) => {
+                                        const mainCatId = e.target.value;
+                                        setData('main_category_id', mainCatId);
+                                        setData('subcategory_id', ''); // Reset subcategory
+                                        setSelectedMainCategory(mainCategories?.find(cat => cat.id === parseInt(mainCatId)));
+                                    }}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
                                 >
-                                    <option value="">Select Category</option>
-                                    {categories.map(cat => (
+                                    <option value="">Select Main Category</option>
+                                    {mainCategories?.map(cat => (
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
                                 </select>
-                                {errors.category_id && <p className="mt-1 text-sm text-red-600">{errors.category_id}</p>}
+                                {errors.main_category_id && <p className="mt-1 text-sm text-red-600">{errors.main_category_id}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Subcategory *
+                                </label>
+                                <select
+                                    value={data.subcategory_id}
+                                    onChange={(e) => setData('subcategory_id', e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
+                                    disabled={!selectedMainCategory}
+                                >
+                                    <option value="">Select Subcategory</option>
+                                    {selectedMainCategory?.active_subcategories?.map(sub => (
+                                        <option key={sub.id} value={sub.id}>{sub.name}</option>
+                                    ))}
+                                </select>
+                                {errors.subcategory_id && <p className="mt-1 text-sm text-red-600">{errors.subcategory_id}</p>}
                             </div>
                         </div>
 
@@ -105,7 +159,7 @@ export default function CreateProduct({ categories }) {
                         </div>
 
                         {/* Pricing */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Regular Price *
@@ -114,11 +168,28 @@ export default function CreateProduct({ categories }) {
                                     type="number"
                                     step="0.01"
                                     value={data.price}
-                                    onChange={(e) => setData('price', e.target.value)}
+                                    onChange={(e) => handlePriceChange(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
                                     placeholder="0.00"
                                 />
                                 {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Discount %
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max="100"
+                                    value={discountPercentage}
+                                    onChange={(e) => handleDiscountChange(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
+                                    placeholder="0"
+                                />
+                                <p className="mt-1 text-xs text-gray-500">Auto-calculates sale price</p>
                             </div>
 
                             <div>
@@ -129,7 +200,7 @@ export default function CreateProduct({ categories }) {
                                     type="number"
                                     step="0.01"
                                     value={data.sale_price}
-                                    onChange={(e) => setData('sale_price', e.target.value)}
+                                    onChange={(e) => handleSalePriceChange(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
                                     placeholder="0.00"
                                 />
