@@ -99,27 +99,36 @@ jobs:
       - name: 🚀 Deploy to production server
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_USER }}
-          key: ${{ secrets.PRODUCTION_SSH_KEY }}
-          port: ${{ secrets.PRODUCTION_PORT || 22 }}
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USERNAME }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }}
           script: |
             set -e
             
             echo "🔄 Starting deployment..."
             
             # Navigate to project directory
-            cd ${{ secrets.PRODUCTION_PATH }}
+            cd /home/u885878505/domains/avhira.com/avhira
+            
+            # Create backup directory
+            BACKUP_DIR="backups/$(date +%Y%m%d_%H%M%S)"
+            mkdir -p $BACKUP_DIR
+            
+            # Backup .env file
+            if [ -f ".env" ]; then
+              cp .env $BACKUP_DIR/.env
+            fi
+            
+            # Backup storage/app
+            if [ -d "storage/app" ]; then
+              cp -r storage/app $BACKUP_DIR/storage_app
+            fi
+            
+            echo "✓ Backup created at $BACKUP_DIR"
             
             # Enable maintenance mode
-            php artisan down --message="Upgrading application, please wait..." || true
-            echo "✓ Maintenance mode enabled"
-            
-            # Backup database
-            BACKUP_DIR="$HOME/backups/$(date +%Y%m%d_%H%M%S)"
-            mkdir -p "$BACKUP_DIR"
-            mysqldump -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_DATABASE }} > "$BACKUP_DIR/database.sql" || echo "⚠ Database backup failed"
-            echo "✓ Database backup created"
+            php artisan down --message="Upgrading application, please wait..." || echo "Maintenance mode already enabled"
             
             # Pull latest changes
             git fetch origin main
@@ -148,18 +157,13 @@ jobs:
             echo "✓ Caches optimized"
             
             # Fix permissions
-            chmod -R 775 storage bootstrap/cache
-            chown -R www-data:www-data storage bootstrap/cache
+            chmod -R 755 storage bootstrap/cache
+            chmod -R 775 storage/logs storage/framework
             echo "✓ Permissions fixed"
             
             # Disable maintenance mode
             php artisan up
             echo "✓ Maintenance mode disabled"
-            
-            # Restart services
-            sudo systemctl restart php8.2-fpm || echo "⚠ PHP-FPM restart failed"
-            sudo systemctl reload nginx || echo "⚠ Nginx reload failed"
-            echo "✓ Services restarted"
             
             echo "🎉 Deployment completed successfully!"
 
@@ -171,8 +175,8 @@ jobs:
           echo "Waiting for application to start..."
           sleep 10
           
-          # Check if site is responding (replace with your actual URL)
-          if curl -f -s -o /dev/null -w "%{http_code}" ${{ secrets.PRODUCTION_URL }} | grep -q "200"; then
+          # Check if site is responding
+          if curl -f -s -o /dev/null -w "%{http_code}" https://avhira.com | grep -q "200"; then
             echo "✓ Site is responding correctly"
             echo "### ✅ Health Check Passed" >> $GITHUB_STEP_SUMMARY
           else
@@ -181,37 +185,22 @@ jobs:
           fi
 
       # =============================================================================
-      # Notification (Optional)
-      # =============================================================================
-      - name: 📧 Send deployment notification
-        if: always()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          text: |
-            Deployment to production ${{ job.status }}
-            Commit: ${{ github.event.head_commit.message }}
-            Author: ${{ github.actor }}
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-        continue-on-error: true
-
-      # =============================================================================
       # Deployment Failed Rollback
       # =============================================================================
       - name: 🔄 Rollback on failure
         if: failure()
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_USER }}
-          key: ${{ secrets.PRODUCTION_SSH_KEY }}
-          port: ${{ secrets.PRODUCTION_PORT || 22 }}
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USERNAME }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }}
           script: |
             set -e
             
             echo "❌ Deployment failed, attempting rollback..."
             
-            cd ${{ secrets.PRODUCTION_PATH }}
+            cd /home/u885878505/domains/avhira.com/avhira
             
             # Disable maintenance mode
             php artisan up || true
@@ -227,10 +216,6 @@ jobs:
             php artisan route:clear
             php artisan view:clear
             php artisan cache:clear
-            
-            # Restart services
-            sudo systemctl restart php8.2-fpm || true
-            sudo systemctl reload nginx || true
             
             echo "⚠ Rollback completed. Please check the application."
 
