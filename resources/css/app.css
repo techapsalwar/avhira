@@ -140,6 +140,35 @@
 
     body {
         @apply bg-background text-foreground;
+        position: relative;
+    }
+
+    /* Jaipuri Print Background Pattern */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        opacity: 0.04;
+        background-image: url('/images/jaipuri-pattern.svg');
+        background-size: 200px 200px;
+        background-repeat: repeat;
+        background-position: center;
+        pointer-events: none;
+    }
+
+    /* Alternative: More visible pattern (can be toggled via class) */
+    body.jaipuri-visible::before {
+        opacity: 1;
+    }
+
+    /* For dark mode backgrounds */
+    body.dark::before {
+        opacity: 0.02;
+        filter: invert(1);
     }
 }
 

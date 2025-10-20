@@ -1,0 +1,85 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Jaipuri Block Print Pattern -->
+    <pattern id="jaipuri-pattern" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+      <!-- Background -->
+      <rect width="200" height="200" fill="#ffffff"/>
+      
+      <!-- Central Mandala -->
+      <g transform="translate(100, 100)">
+        <!-- Outer petals -->
+        <g opacity="0.4">
+          <ellipse cx="0" cy="-35" rx="8" ry="20" fill="#be1e2d" transform="rotate(0)"/>
+          <ellipse cx="0" cy="-35" rx="8" ry="20" fill="#be1e2d" transform="rotate(45)"/>
+          <ellipse cx="0" cy="-35" rx="8" ry="20" fill="#be1e2d" transform="rotate(90)"/>
+          <ellipse cx="0" cy="-35" rx="8" ry="20" fill="#be1e2d" transform="rotate(135)"/>
+          <ellipse cx="0" cy="-35" rx="8" ry="20" fill="#be1e2d" transform="rotate(180)"/>
+          <ellipse cx="0" cy="-35" rx="8" ry="20" fill="#be1e2d" transform="rotate(225)"/>
+          <ellipse cx="0" cy="-35" rx="8" ry="20" fill="#be1e2d" transform="rotate(270)"/>
+          <ellipse cx="0" cy="-35" rx="8" ry="20" fill="#be1e2d" transform="rotate(315)"/>
+        </g>
+        
+        <!-- Inner petals -->
+        <g opacity="0.5">
+          <ellipse cx="0" cy="-20" rx="6" ry="12" fill="#be1e2d" transform="rotate(22.5)"/>
+          <ellipse cx="0" cy="-20" rx="6" ry="12" fill="#be1e2d" transform="rotate(67.5)"/>
+          <ellipse cx="0" cy="-20" rx="6" ry="12" fill="#be1e2d" transform="rotate(112.5)"/>
+          <ellipse cx="0" cy="-20" rx="6" ry="12" fill="#be1e2d" transform="rotate(157.5)"/>
+          <ellipse cx="0" cy="-20" rx="6" ry="12" fill="#be1e2d" transform="rotate(202.5)"/>
+          <ellipse cx="0" cy="-20" rx="6" ry="12" fill="#be1e2d" transform="rotate(247.5)"/>
+          <ellipse cx="0" cy="-20" rx="6" ry="12" fill="#be1e2d" transform="rotate(292.5)"/>
+          <ellipse cx="0" cy="-20" rx="6" ry="12" fill="#be1e2d" transform="rotate(337.5)"/>
+        </g>
+        
+        <!-- Center circle -->
+        <circle cx="0" cy="0" r="8" fill="none" stroke="#be1e2d" stroke-width="2" opacity="0.6"/>
+        <circle cx="0" cy="0" r="4" fill="#be1e2d" opacity="0.5"/>
+      </g>
+      
+      <!-- Corner decorative elements -->
+      <g opacity="0.3">
+        <!-- Top-left corner -->
+        <circle cx="20" cy="20" r="3" fill="#be1e2d"/>
+        <circle cx="30" cy="10" r="2" fill="#be1e2d"/>
+        <circle cx="10" cy="30" r="2" fill="#be1e2d"/>
+        
+        <!-- Top-right corner -->
+        <circle cx="180" cy="20" r="3" fill="#be1e2d"/>
+        <circle cx="170" cy="10" r="2" fill="#be1e2d"/>
+        <circle cx="190" cy="30" r="2" fill="#be1e2d"/>
+        
+        <!-- Bottom-left corner -->
+        <circle cx="20" cy="180" r="3" fill="#be1e2d"/>
+        <circle cx="30" cy="190" r="2" fill="#be1e2d"/>
+        <circle cx="10" cy="170" r="2" fill="#be1e2d"/>
+        
+        <!-- Bottom-right corner -->
+        <circle cx="180" cy="180" r="3" fill="#be1e2d"/>
+        <circle cx="170" cy="190" r="2" fill="#be1e2d"/>
+        <circle cx="190" cy="170" r="2" fill="#be1e2d"/>
+      </g>
+      
+      <!-- Small decorative dots scattered -->
+      <g opacity="0.2">
+        <circle cx="50" cy="50" r="1.5" fill="#be1e2d"/>
+        <circle cx="150" cy="50" r="1.5" fill="#be1e2d"/>
+        <circle cx="50" cy="150" r="1.5" fill="#be1e2d"/>
+        <circle cx="150" cy="150" r="1.5" fill="#be1e2d"/>
+        <circle cx="100" cy="30" r="1" fill="#be1e2d"/>
+        <circle cx="100" cy="170" r="1" fill="#be1e2d"/>
+        <circle cx="30" cy="100" r="1" fill="#be1e2d"/>
+        <circle cx="170" cy="100" r="1" fill="#be1e2d"/>
+      </g>
+      
+      <!-- Border pattern -->
+      <g opacity="0.25">
+        <rect x="0" y="0" width="200" height="2" fill="#be1e2d"/>
+        <rect x="0" y="198" width="200" height="2" fill="#be1e2d"/>
+        <rect x="0" y="0" width="2" height="200" fill="#be1e2d"/>
+        <rect x="198" y="0" width="2" height="200" fill="#be1e2d"/>
+      </g>
+    </pattern>
+  </defs>
+  
+  <rect width="200" height="200" fill="url(#jaipuri-pattern)"/>
+</svg>
