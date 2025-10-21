@@ -13,6 +13,11 @@ class MaintenanceController extends Controller
      */
     public function show()
     {
+        // If maintenance mode is OFF, redirect to home
+        if (!Cache::get('site_maintenance_mode', false)) {
+            return redirect()->route('home');
+        }
+
         return Inertia::render('Maintenance', [
             'message' => Cache::get('maintenance_message', 'We are currently performing scheduled maintenance. Please check back soon!'),
         ]);
