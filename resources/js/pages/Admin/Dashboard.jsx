@@ -1,8 +1,9 @@
 // File: resources/js/Pages/Admin/Dashboard.jsx
 
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
 
 const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', {
@@ -11,7 +12,11 @@ const formatPrice = (price) => {
     }).format(price);
 };
 
-export default function Dashboard({ stats, revenueData, topProducts, recentOrders, categorySales }) {
+export default function Dashboard({ stats, revenueData, topProducts, recentOrders, categorySales, maintenanceMode }) {
+    const [isMaintenanceMode, setIsMaintenanceMode] = useState(maintenanceMode || false);
+    const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+    const [maintenanceMessage, setMaintenanceMessage] = useState('');
+
     // Calculate revenue trend
     const revenueTrend = useMemo(() => {
         if (!revenueData || revenueData.length < 2) return 0;
@@ -66,15 +71,81 @@ export default function Dashboard({ stats, revenueData, topProducts, recentOrder
         return colors[status] || 'bg-gray-100 text-gray-800';
     };
 
+    const toggleMaintenanceMode = () => {
+        if (!isMaintenanceMode) {
+            // Show modal to confirm and optionally add message
+            setShowMaintenanceModal(true);
+        } else {
+            // Directly disable
+            router.post('/admin/maintenance/toggle', {}, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setIsMaintenanceMode(false);
+                    toast.success('Maintenance mode disabled', {
+                        style: {
+                            background: '#be1e2d',
+                            color: '#faf5f6',
+                        },
+                    });
+                },
+            });
+        }
+    };
+
+    const enableMaintenanceMode = () => {
+        router.post('/admin/maintenance/toggle', { message: maintenanceMessage }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setIsMaintenanceMode(true);
+                setShowMaintenanceModal(false);
+                setMaintenanceMessage('');
+                toast.success('Maintenance mode enabled', {
+                    style: {
+                        background: '#be1e2d',
+                        color: '#faf5f6',
+                    },
+                });
+            },
+        });
+    };
+
     return (
         <AdminLayout>
             <Head title="Admin Dashboard - Avhira" />
 
             <div className="space-y-6">
-                {/* Welcome Section */}
+                {/* Welcome Section with Maintenance Toggle */}
                 <div className="bg-white rounded-2xl shadow-md p-6 border-l-4" style={{ borderLeftColor: '#be1e2d' }}>
-                    <h2 className="text-2xl font-bold text-gray-900">Welcome to Avhira Admin</h2>
-                    <p className="text-gray-600 mt-1">Manage your clothing store with ease</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-900">Welcome to Avhira Admin</h2>
+                            <p className="text-gray-600 mt-1">Manage your clothing store with ease</p>
+                        </div>
+                        
+                        {/* Maintenance Mode Toggle */}
+                        <div className="flex items-center gap-3">
+                            <div className="text-right">
+                                <p className="text-sm font-medium text-gray-700">Maintenance Mode</p>
+                                <p className="text-xs text-gray-500">
+                                    {isMaintenanceMode ? 'Site is offline' : 'Site is online'}
+                                </p>
+                            </div>
+                            <button
+                                onClick={toggleMaintenanceMode}
+                                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                                    isMaintenanceMode 
+                                        ? 'bg-avhira-primary focus:ring-avhira-primary' 
+                                        : 'bg-gray-300 focus:ring-gray-400'
+                                }`}
+                            >
+                                <span
+                                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                                        isMaintenanceMode ? 'translate-x-7' : 'translate-x-1'
+                                    }`}
+                                />
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Stats Cards */}
@@ -275,6 +346,60 @@ export default function Dashboard({ stats, revenueData, topProducts, recentOrder
                         </Link>
                     </div>
                 </div>
+
+                {/* Maintenance Mode Modal */}
+                {showMaintenanceModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-gray-900">Enable Maintenance Mode</h3>
+                                <button
+                                    onClick={() => setShowMaintenanceModal(false)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div className="mb-6">
+                                <p className="text-gray-600 mb-4">
+                                    This will make the website inaccessible to all visitors except admins. 
+                                    Login functionality will remain available.
+                                </p>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Custom Message (Optional)
+                                    </label>
+                                    <textarea
+                                        value={maintenanceMessage}
+                                        onChange={(e) => setMaintenanceMessage(e.target.value)}
+                                        placeholder="We are currently performing scheduled maintenance. Please check back soon!"
+                                        rows={4}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-primary focus:border-transparent"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowMaintenanceModal(false)}
+                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={enableMaintenanceMode}
+                                    className="flex-1 px-4 py-2 bg-avhira-primary text-white rounded-lg hover:bg-avhira-primary-dark transition-colors"
+                                >
+                                    Enable
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </AdminLayout>
     );

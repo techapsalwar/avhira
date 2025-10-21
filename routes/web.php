@@ -5,8 +5,12 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\MaintenanceController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+// Maintenance Mode Page (accessible to everyone)
+Route::get('/maintenance', [MaintenanceController::class, 'show'])->name('maintenance.show');
 
 // Public Routes
 Route::get('/', [WelcomeController::class, 'index'])->name('home');

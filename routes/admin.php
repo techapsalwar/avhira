@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminOrderController;
+use App\Http\Controllers\MaintenanceController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
@@ -52,4 +53,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::put('/orders/{order}', [AdminOrderController::class, 'update'])->name('admin.orders.update');
     Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
     Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'generateInvoice'])->name('admin.orders.invoice');
+
+    // Maintenance Mode management
+    Route::post('/maintenance/toggle', [MaintenanceController::class, 'toggle'])->name('admin.maintenance.toggle');
+    Route::get('/maintenance/status', [MaintenanceController::class, 'status'])->name('admin.maintenance.status');
 });

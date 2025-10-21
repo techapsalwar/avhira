@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Order;
 use App\Models\MainCategory;
 use App\Models\Subcategory;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -73,6 +74,7 @@ class AdminController extends Controller
             'topProducts' => $topProducts,
             'recentOrders' => $recentOrders,
             'categorySales' => $categorySales,
+            'maintenanceMode' => Cache::get('site_maintenance_mode', false),
         ]);
     }
 }
