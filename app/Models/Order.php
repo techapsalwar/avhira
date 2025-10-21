@@ -14,12 +14,15 @@ class Order extends Model
         'order_number',
         'total_amount',
         'status',
+        'payment_method',
+        'payment_status',
         'shipping_address',
         'shipping_city',
         'shipping_state',
         'shipping_pincode',
         'phone',
         'notes',
+        'tracking_number',
     ];
 
     protected $casts = [
@@ -40,6 +43,14 @@ class Order extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Accessor for items (alias for orderItems)
+     */
+    public function getItemsAttribute()
+    {
+        return $this->orderItems;
     }
 
     /**

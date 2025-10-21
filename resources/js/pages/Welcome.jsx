@@ -7,10 +7,16 @@ import CardSwap, { Card } from '@/Components/CardSwap';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/Components/GlobalToastProvider';
 
-export default function Welcome({ featuredProducts, categories }) {
+export default function Welcome({ featuredForHer, featuredForHim, categories }) {
     const [scrollY, setScrollY] = useState(0);
     const { flash } = usePage().props;
     const { showToast } = useToast();
+
+    // Horizontal scroll states for For Her and For Him sections
+    const [canScrollLeftHer, setCanScrollLeftHer] = useState(false);
+    const [canScrollRightHer, setCanScrollRightHer] = useState(true);
+    const [canScrollLeftHim, setCanScrollLeftHim] = useState(false);
+    const [canScrollRightHim, setCanScrollRightHim] = useState(true);
 
     // Hero image carousel state
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -87,6 +93,17 @@ export default function Welcome({ featuredProducts, categories }) {
         return () => clearTimeout(startDelay);
     }, [hasAnimated]);
 
+    // Initialize scroll button states
+    useEffect(() => {
+        const initScrollStates = () => {
+            handleScrollHer('scroll-container-her');
+            handleScrollHim('scroll-container-him');
+        };
+        
+        // Delay to ensure DOM is ready
+        setTimeout(initScrollStates, 100);
+    }, [featuredForHer, featuredForHim]);
+
     const handlePrevImage = () => {
         setCurrentImageIndex((prevIndex) => 
             prevIndex === 0 ? heroImages.length - 1 : prevIndex - 1
@@ -97,6 +114,50 @@ export default function Welcome({ featuredProducts, categories }) {
         setCurrentImageIndex((prevIndex) => 
             (prevIndex + 1) % heroImages.length
         );
+    };
+
+    // Horizontal scroll handlers for For Her section
+    const handleScrollHer = (scrollContainerId) => {
+        const container = document.getElementById(scrollContainerId);
+        if (container) {
+            setCanScrollLeftHer(container.scrollLeft > 0);
+            setCanScrollRightHer(
+                container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+            );
+        }
+    };
+
+    const scrollHer = (direction) => {
+        const container = document.getElementById('scroll-container-her');
+        if (container) {
+            const scrollAmount = container.clientWidth * 0.8;
+            container.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    // Horizontal scroll handlers for For Him section
+    const handleScrollHim = (scrollContainerId) => {
+        const container = document.getElementById(scrollContainerId);
+        if (container) {
+            setCanScrollLeftHim(container.scrollLeft > 0);
+            setCanScrollRightHim(
+                container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+            );
+        }
+    };
+
+    const scrollHim = (direction) => {
+        const container = document.getElementById('scroll-container-him');
+        if (container) {
+            const scrollAmount = container.clientWidth * 0.8;
+            container.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
     };
 
     return (
@@ -273,9 +334,9 @@ export default function Welcome({ featuredProducts, categories }) {
                 </div>
             </section>
 
-            {/* Featured Products */}
-            {featuredProducts && featuredProducts.length > 0 && (
-                <section className="container mx-auto px-4 lg:px-8 xl:px-20 py-12 sm:py-16 lg:py-20 max-w-[1600px]">
+            {/* Featured Products - For Her & For Him */}
+            {((featuredForHer && featuredForHer.length > 0) || (featuredForHim && featuredForHim.length > 0)) && (
+                <section id="featured" className="container mx-auto px-4 lg:px-8 xl:px-20 py-12 sm:py-16 lg:py-20 max-w-[1600px] scroll-mt-32">
                     {/* Section Header */}
                     <div className="text-center mb-8 sm:mb-12 lg:mb-16">
                         <span className="inline-block px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4"
@@ -283,41 +344,183 @@ export default function Welcome({ featuredProducts, categories }) {
                             Featured Collection
                         </span>
                         <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 px-4">
-                            Handpicked For You
+                            Handpicked
                         </h2>
                         <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
                             Curated selection of our finest pieces. Each item chosen for its exceptional quality and style.
                         </p>
                     </div>
 
-                    {/* Products Grid with Stagger Animation */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
-                        {featuredProducts.map((product, index) => (
-                            <div 
-                                key={product.id} 
-                                className="animate-fade-in"
-                                style={{ animationDelay: `${index * 0.1}s` }}
-                            >
-                                <ProductCard product={product} />
+                    {/* Two-Section Layout - For Her & For Him */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+                        {/* For Her Section */}
+                        {featuredForHer && featuredForHer.length > 0 && (
+                            <div className="space-y-6">
+                                <div className="text-center lg:text-left">
+                                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                                        For Her
+                                    </h3>
+                                    <div className="w-16 h-1 mx-auto lg:mx-0" style={{ backgroundColor: '#be1e2d' }}></div>
+                                </div>
+                                
+                                {/* Horizontal Scroll Container */}
+                                <div className="relative group">
+                                    {/* Left Scroll Button */}
+                                    {canScrollLeftHer && (
+                                        <button
+                                            onClick={() => scrollHer('left')}
+                                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all opacity-0 group-hover:opacity-100"
+                                            style={{ marginLeft: '-12px' }}
+                                            aria-label="Scroll left"
+                                        >
+                                            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                        </button>
+                                    )}
+
+                                    {/* Scrollable Products Container */}
+                                    <div 
+                                        id="scroll-container-her"
+                                        className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
+                                        onScroll={() => handleScrollHer('scroll-container-her')}
+                                        style={{
+                                            scrollSnapType: 'x mandatory',
+                                            WebkitOverflowScrolling: 'touch'
+                                        }}
+                                    >
+                                        {featuredForHer.map((product, index) => (
+                                            <div 
+                                                key={product.id} 
+                                                className="flex-shrink-0 w-[calc(33.333%-8px)] min-w-[200px] animate-fade-in"
+                                                style={{ 
+                                                    animationDelay: `${index * 0.1}s`,
+                                                    scrollSnapAlign: 'start'
+                                                }}
+                                            >
+                                                <ProductCard product={product} />
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Right Scroll Button */}
+                                    {canScrollRightHer && (
+                                        <button
+                                            onClick={() => scrollHer('right')}
+                                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all opacity-0 group-hover:opacity-100"
+                                            style={{ marginRight: '-12px' }}
+                                            aria-label="Scroll right"
+                                        >
+                                            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Explore Women Button */}
+                                <div className="text-center lg:text-left mt-6">
+                                    <Link
+                                        href="/categories/women"
+                                        className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white transition-all transform hover:scale-105 shadow-md"
+                                        style={{ backgroundColor: '#be1e2d' }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9a1824'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#be1e2d'}
+                                    >
+                                        Explore Women
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                        </svg>
+                                    </Link>
+                                </div>
                             </div>
-                        ))}
+                        )}
+
+                        {/* For Him Section */}
+                        {featuredForHim && featuredForHim.length > 0 && (
+                            <div className="space-y-6">
+                                <div className="text-center lg:text-left">
+                                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                                        For Him
+                                    </h3>
+                                    <div className="w-16 h-1 mx-auto lg:mx-0" style={{ backgroundColor: '#be1e2d' }}></div>
+                                </div>
+                                
+                                {/* Horizontal Scroll Container */}
+                                <div className="relative group">
+                                    {/* Left Scroll Button */}
+                                    {canScrollLeftHim && (
+                                        <button
+                                            onClick={() => scrollHim('left')}
+                                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all opacity-0 group-hover:opacity-100"
+                                            style={{ marginLeft: '-12px' }}
+                                            aria-label="Scroll left"
+                                        >
+                                            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                        </button>
+                                    )}
+
+                                    {/* Scrollable Products Container */}
+                                    <div 
+                                        id="scroll-container-him"
+                                        className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
+                                        onScroll={() => handleScrollHim('scroll-container-him')}
+                                        style={{
+                                            scrollSnapType: 'x mandatory',
+                                            WebkitOverflowScrolling: 'touch'
+                                        }}
+                                    >
+                                        {featuredForHim.map((product, index) => (
+                                            <div 
+                                                key={product.id} 
+                                                className="flex-shrink-0 w-[calc(33.333%-8px)] min-w-[200px] animate-fade-in"
+                                                style={{ 
+                                                    animationDelay: `${index * 0.1}s`,
+                                                    scrollSnapAlign: 'start'
+                                                }}
+                                            >
+                                                <ProductCard product={product} />
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Right Scroll Button */}
+                                    {canScrollRightHim && (
+                                        <button
+                                            onClick={() => scrollHim('right')}
+                                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all opacity-0 group-hover:opacity-100"
+                                            style={{ marginRight: '-12px' }}
+                                            aria-label="Scroll right"
+                                        >
+                                            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Explore Men Button */}
+                                <div className="text-center lg:text-left mt-6">
+                                    <Link
+                                        href="/categories/men"
+                                        className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white transition-all transform hover:scale-105 shadow-md"
+                                        style={{ backgroundColor: '#be1e2d' }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9a1824'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#be1e2d'}
+                                    >
+                                        Explore Men
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                        </svg>
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* View All CTA */}
-                    <div className="text-center mt-8 sm:mt-12">
-                        <Link
-                            href="/products"
-                            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base font-semibold text-white transition-all transform hover:scale-105 shadow-lg"
-                            style={{ backgroundColor: '#be1e2d' }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9a1824'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#be1e2d'}
-                        >
-                            View All Products
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                        </Link>
-                    </div>
+                    
                 </section>
             )}
 

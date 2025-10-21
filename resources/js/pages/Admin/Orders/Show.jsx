@@ -5,8 +5,10 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { toast } from 'react-hot-toast';
 
 export default function ShowOrder({ order }) {
-    const { data, setData, put, processing } = useForm({
+    const { data, setData, patch, processing } = useForm({
         status: order.status,
+        tracking_number: order.tracking_number || '',
+        notes: order.notes || '',
     });
 
     const statusOptions = [
@@ -18,13 +20,21 @@ export default function ShowOrder({ order }) {
     ];
 
     const handleStatusUpdate = () => {
-        put(route('admin.orders.update', order.id), {
+        patch(`/admin/orders/${order.id}/status`, {
             preserveScroll: true,
             onSuccess: () => {
                 toast.success('Order status updated successfully', {
                     style: {
                         background: '#be1e2d',
                         color: '#faf5f6',
+                    },
+                });
+            },
+            onError: (errors) => {
+                toast.error('Failed to update order status', {
+                    style: {
+                        background: '#dc2626',
+                        color: '#ffffff',
                     },
                 });
             },
@@ -50,17 +60,39 @@ export default function ShowOrder({ order }) {
                 {/* Header */}
                 <div className="bg-white rounded-2xl shadow-md p-6">
                     <div className="flex justify-between items-start">
-                        <div>
-                            <h2 className="text-3xl font-bold text-gray-900">Order #{order.id}</h2>
-                            <p className="text-gray-600 mt-1">
-                                Placed on {new Date(order.created_at).toLocaleDateString()} at {new Date(order.created_at).toLocaleTimeString()}
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                                <h2 className="text-3xl font-bold text-gray-900">Order #{order.id}</h2>
+                                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(order.status)}`}>
+                                    {order.status.toUpperCase()}
+                                </span>
+                            </div>
+                            {order.order_number && (
+                                <p className="text-gray-600 font-mono text-sm mb-1">
+                                    Order Number: {order.order_number}
+                                </p>
+                            )}
+                            <p className="text-gray-600">
+                                Placed on {new Date(order.created_at).toLocaleDateString('en-IN', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                })} at {new Date(order.created_at).toLocaleTimeString('en-IN', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
                             </p>
+                            {order.updated_at !== order.created_at && (
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Last updated: {new Date(order.updated_at).toLocaleDateString('en-IN')} at {new Date(order.updated_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                            )}
                         </div>
                         <Link
                             href="/admin/orders"
                             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-all"
                         >
-                            Back to Orders
+                            ← Back to Orders
                         </Link>
                     </div>
                 </div>
@@ -69,9 +101,12 @@ export default function ShowOrder({ order }) {
                     {/* Order Items */}
                     <div className="lg:col-span-2 space-y-6">
                         <div className="bg-white rounded-2xl shadow-md p-6">
-                            <h3 className="text-xl font-bold text-gray-900 mb-4">Order Items</h3>
-                            <div className="space-y-4">
-                                {order.items?.map(item => (
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">
+                                Order Items ({order.items?.length || 0})
+                            </h3>
+                            {order.items && order.items.length > 0 ? (
+                                <div className="space-y-4">
+                                {order.items.map(item => (
                                     <div key={item.id} className="flex gap-4 p-4 border border-gray-200 rounded-lg">
                                         {item.product?.images?.[0] && (
                                             <img
@@ -95,7 +130,15 @@ export default function ShowOrder({ order }) {
                                         </div>
                                     </div>
                                 ))}
-                            </div>
+                                </div>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                    </svg>
+                                    <p className="mt-2 text-gray-500">No items in this order</p>
+                                </div>
+                            )}
 
                             {/* Order Summary */}
                             <div className="mt-6 pt-6 border-t border-gray-200">
@@ -168,11 +211,15 @@ export default function ShowOrder({ order }) {
                             <div className="space-y-3">
                                 <div>
                                     <p className="text-sm text-gray-600">Name</p>
-                                    <p className="font-medium text-gray-900">{order.user?.name}</p>
+                                    <p className="font-medium text-gray-900">{order.user?.name || 'Guest'}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600">Email</p>
-                                    <p className="font-medium text-gray-900">{order.user?.email}</p>
+                                    <p className="font-medium text-gray-900">{order.user?.email || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600">Phone</p>
+                                    <p className="font-medium text-gray-900">{order.phone || 'N/A'}</p>
                                 </div>
                             </div>
                         </div>
@@ -181,14 +228,39 @@ export default function ShowOrder({ order }) {
                         <div className="bg-white rounded-2xl shadow-md p-6">
                             <h3 className="text-lg font-bold text-gray-900 mb-4">Shipping Address</h3>
                             <div className="space-y-2">
-                                <p className="text-gray-700">{order.shipping_address?.street || 'N/A'}</p>
+                                <p className="text-gray-700">{order.shipping_address || 'N/A'}</p>
                                 <p className="text-gray-700">
-                                    {order.shipping_address?.city || 'N/A'}, {order.shipping_address?.state || 'N/A'}
+                                    {order.shipping_city || 'N/A'}, {order.shipping_state || 'N/A'} - {order.shipping_pincode || 'N/A'}
                                 </p>
-                                <p className="text-gray-700">{order.shipping_address?.zip_code || 'N/A'}</p>
-                                <p className="text-gray-700">{order.shipping_address?.country || 'N/A'}</p>
                             </div>
                         </div>
+
+                        {/* Order Details */}
+                        {(order.order_number || order.tracking_number || order.notes) && (
+                            <div className="bg-white rounded-2xl shadow-md p-6">
+                                <h3 className="text-lg font-bold text-gray-900 mb-4">Order Details</h3>
+                                <div className="space-y-3">
+                                    {order.order_number && (
+                                        <div>
+                                            <p className="text-sm text-gray-600">Order Number</p>
+                                            <p className="font-medium text-gray-900 font-mono">{order.order_number}</p>
+                                        </div>
+                                    )}
+                                    {order.tracking_number && (
+                                        <div>
+                                            <p className="text-sm text-gray-600">Tracking Number</p>
+                                            <p className="font-medium text-gray-900 font-mono">{order.tracking_number}</p>
+                                        </div>
+                                    )}
+                                    {order.notes && (
+                                        <div>
+                                            <p className="text-sm text-gray-600">Notes</p>
+                                            <p className="font-medium text-gray-700">{order.notes}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Payment Info */}
                         <div className="bg-white rounded-2xl shadow-md p-6">

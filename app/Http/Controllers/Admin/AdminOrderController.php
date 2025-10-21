@@ -11,13 +11,13 @@ class AdminOrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::with('user');
+        $query = Order::with(['user', 'orderItems']);
 
         // Search functionality
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('id', 'like', '%' . $request->search . '%')
-                  ->orWhere('guest_email', 'like', '%' . $request->search . '%')
+                  ->orWhere('order_number', 'like', '%' . $request->search . '%')
                   ->orWhereHas('user', function($userQuery) use ($request) {
                       $userQuery->where('name', 'like', '%' . $request->search . '%')
                                ->orWhere('email', 'like', '%' . $request->search . '%');
@@ -26,7 +26,7 @@ class AdminOrderController extends Controller
         }
 
         // Status filter
-        if ($request->filled('status')) {
+        if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
@@ -39,6 +39,13 @@ class AdminOrderController extends Controller
         }
 
         $orders = $query->latest()->paginate(15)->withQueryString();
+        
+        // Add items count to each order
+        $orders->getCollection()->transform(function ($order) {
+            $orderArray = $order->toArray();
+            $orderArray['items'] = $order->orderItems;
+            return $orderArray;
+        });
 
         $statusCounts = [
             'all' => Order::count(),
@@ -59,9 +66,13 @@ class AdminOrderController extends Controller
     public function show(Order $order)
     {
         $order->load(['user', 'orderItems.product']);
+        
+        // Add items as alias for orderItems for consistency with frontend
+        $orderData = $order->toArray();
+        $orderData['items'] = $order->orderItems;
 
         return Inertia::render('Admin/Orders/Show', [
-            'order' => $order,
+            'order' => $orderData,
         ]);
     }
 

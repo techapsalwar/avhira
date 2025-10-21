@@ -1,6 +1,6 @@
 // File: resources/js/Layouts/MainLayout.jsx
 
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 import AuthModal from '@/Components/AuthModal';
 import CartSlider from '@/Components/CartSlider';
@@ -27,14 +27,42 @@ export default function MainLayout({ children }) {
     }
 
     const navLinks = [
-        { label: 'Products', href: '/products' },
-        { label: 'Categories', href: '/categories' },
-        { label: 'Contact', href: '/contact' },
+        { label: 'Men', href: '/categories/men' },
+        { label: 'Women', href: '/categories/women' },
+        { label: 'Featured', href: '/#featured', scrollTo: 'featured' },
+        { label: 'About Us', href: '/about' },
     ];
 
     const isActive = (link) => {
         if (link.href === '/') return currentPath === '/';
+        if (link.href === '/#featured') return currentPath === '/';
         return currentPath.startsWith(link.href);
+    };
+
+    const handleNavClick = (e, link) => {
+        if (link.scrollTo) {
+            e.preventDefault();
+            
+            // If not on homepage, navigate there first
+            if (currentPath !== '/') {
+                router.visit('/', {
+                    onSuccess: () => {
+                        setTimeout(() => {
+                            const element = document.getElementById(link.scrollTo);
+                            if (element) {
+                                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }, 100);
+                    }
+                });
+            } else {
+                // Already on homepage, just scroll
+                const element = document.getElementById(link.scrollTo);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
     };
 
     useEffect(() => {
@@ -107,6 +135,7 @@ export default function MainLayout({ children }) {
                             <Link
                                 key={link.label}
                                 href={link.href}
+                                onClick={(e) => handleNavClick(e, link)}
                                 className={`relative px-4 py-2 rounded-full transition-all duration-200 text-sm font-medium whitespace-nowrap ${
                                     isActive(link)
                                         ? 'text-white shadow-lg'
@@ -147,13 +176,14 @@ export default function MainLayout({ children }) {
                             </svg>
                         </button>
 
-                        {/* Cart */}
+                        {/* Cart Icon */}
                         <button
                             onClick={() => setCartSliderOpen(true)}
                             className="relative text-gray-700 hover:text-avhira-red transition-colors p-2 rounded-full hover:bg-gray-50"
+                            aria-label="Shopping cart"
                         >
                             <svg 
-                                className="w-5 h-5" 
+                                className="w-6 h-6" 
                                 fill="none" 
                                 stroke="currentColor" 
                                 viewBox="0 0 24 24"
@@ -178,12 +208,34 @@ export default function MainLayout({ children }) {
                         {/* User Menu or Login */}
                         {auth.user ? (
                             <div className="hidden lg:block relative group">
-                                <button className="flex items-center space-x-2 px-4 py-2 rounded-full hover:bg-gray-50 transition-colors">
-                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
-                                         style={{ backgroundColor: '#be1e2d' }}>
-                                        {auth.user.name.charAt(0).toUpperCase()}
-                                    </div>
+                                <button className="flex items-center space-x-2 px-3 py-2 rounded-full hover:bg-gray-50 transition-colors">
+                                    <svg 
+                                        className="w-6 h-6 text-gray-700" 
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            strokeWidth={2} 
+                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
+                                        />
+                                    </svg>
                                     <span className="text-sm font-medium text-gray-700">{auth.user.name}</span>
+                                    <svg 
+                                        className="w-4 h-4 text-gray-500" 
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            strokeWidth={2} 
+                                            d="M19 9l-7 7-7-7" 
+                                        />
+                                    </svg>
                                 </button>
                                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all overflow-hidden">
                                     <Link 
@@ -240,7 +292,10 @@ export default function MainLayout({ children }) {
                                 <Link
                                     key={link.label}
                                     href={link.href}
-                                    onClick={() => setMobileMenuOpen(false)}
+                                    onClick={(e) => {
+                                        handleNavClick(e, link);
+                                        setMobileMenuOpen(false);
+                                    }}
                                     className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
                                         isActive(link)
                                             ? 'text-white'

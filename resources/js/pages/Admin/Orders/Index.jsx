@@ -3,6 +3,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function OrdersIndex({ orders, filters }) {
     const [statusFilter, setStatusFilter] = useState(filters.status || 'all');
@@ -46,6 +47,32 @@ export default function OrdersIndex({ orders, filters }) {
             cancelled: 'bg-red-100 text-red-800',
         };
         return statusColors[status] || 'bg-gray-100 text-gray-800';
+    };
+
+    const handleQuickStatusUpdate = (orderId, newStatus) => {
+        router.patch(`/admin/orders/${orderId}/status`, 
+            { status: newStatus },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    toast.success('Order status updated successfully', {
+                        style: {
+                            background: '#be1e2d',
+                            color: '#faf5f6',
+                        },
+                    });
+                },
+                onError: () => {
+                    toast.error('Failed to update order status', {
+                        style: {
+                            background: '#dc2626',
+                            color: '#ffffff',
+                        },
+                    });
+                },
+            }
+        );
     };
 
     return (
@@ -124,14 +151,21 @@ export default function OrdersIndex({ orders, filters }) {
                                     orders.data.map(order => (
                                         <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4">
-                                                <span className="font-mono text-sm font-semibold text-gray-900">
-                                                    #{order.id}
-                                                </span>
+                                                <div>
+                                                    <span className="font-mono text-sm font-semibold text-gray-900">
+                                                        #{order.id}
+                                                    </span>
+                                                    {order.order_number && (
+                                                        <p className="text-xs text-gray-500 mt-1 font-mono">
+                                                            {order.order_number}
+                                                        </p>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div>
-                                                    <p className="font-medium text-gray-900">{order.user?.name}</p>
-                                                    <p className="text-sm text-gray-500">{order.user?.email}</p>
+                                                    <p className="font-medium text-gray-900">{order.user?.name || 'Guest'}</p>
+                                                    <p className="text-sm text-gray-500">{order.user?.email || order.phone || 'N/A'}</p>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
@@ -145,9 +179,17 @@ export default function OrdersIndex({ orders, filters }) {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                                                    {order.status.toUpperCase()}
-                                                </span>
+                                                <select
+                                                    value={order.status}
+                                                    onChange={(e) => handleQuickStatusUpdate(order.id, e.target.value)}
+                                                    className={`px-3 py-1 rounded-lg text-xs font-semibold border-0 cursor-pointer ${getStatusColor(order.status)}`}
+                                                >
+                                                    {statusOptions.filter(opt => opt.value !== 'all').map(option => (
+                                                        <option key={option.value} value={option.value}>
+                                                            {option.label}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-600">
                                                 {new Date(order.created_at).toLocaleDateString()}

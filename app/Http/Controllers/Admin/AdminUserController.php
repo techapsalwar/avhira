@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
@@ -101,7 +102,7 @@ class AdminUserController extends Controller
     public function destroy(User $user)
     {
         // Prevent deleting yourself
-        if ($user->id === auth()->id()) {
+        if ($user->id === Auth::id()) {
             return back()->with('error', 'You cannot delete your own account.');
         }
 
@@ -114,7 +115,7 @@ class AdminUserController extends Controller
     public function toggleAdmin(User $user)
     {
         // Prevent removing your own admin access
-        if ($user->id === auth()->id()) {
+        if ($user->id === Auth::id()) {
             return back()->with('error', 'You cannot modify your own admin status.');
         }
 

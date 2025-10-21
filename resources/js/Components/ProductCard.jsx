@@ -3,7 +3,7 @@
 import { Link } from '@inertiajs/react';
 import { useToast } from '@/Components/GlobalToastProvider';
 import { useState, useEffect, useRef } from 'react';
-import { ShoppingCart, Plus, Minus, X } from 'lucide-react';
+import { ShoppingCart, X } from 'lucide-react';
 
 const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', {
@@ -15,9 +15,8 @@ const formatPrice = (price) => {
 export default function ProductCard({ product }) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isHovering, setIsHovering] = useState(false);
-    const [step, setStep] = useState('idle'); // 'idle', 'size', 'quantity'
+    const [step, setStep] = useState('idle'); // 'idle', 'size'
     const [selectedSize, setSelectedSize] = useState(null);
-    const [quantity, setQuantity] = useState(1);
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const hoverTimerRef = useRef(null);
     const autoAdvanceTimerRef = useRef(null);
@@ -87,30 +86,45 @@ export default function ProductCard({ product }) {
         e.stopPropagation();
         
         if (step === 'idle') {
-            // Open the bar
+            // If product requires size selection, show size selector
             if (requiresSizeSelection) {
                 setStep('size');
             } else {
-                setStep('quantity');
+                // If no size required, add to cart immediately
+                handleAddToCart(e);
             }
         } else if (step === 'size') {
             // X button - close the bar
             handleCancel(e);
-        } else if (step === 'quantity') {
-            // Cart icon - add to cart if size is selected (or no size required)
-            if (!requiresSizeSelection || selectedSize) {
-                handleAddToCart(e);
-            }
         }
     };
 
-    // Handle size selection
-    const handleSizeSelect = (size) => {
+    // Handle size selection - Add to cart immediately after size is selected
+    const handleSizeSelect = async (size) => {
         setSelectedSize(size);
-        setStep('quantity');
+        setIsAddingToCart(true);
+        
+        try {
+            await window.axios.post('/cart/add', { 
+                product_id: product.id, 
+                quantity: 1,
+                size: size
+            });
+            showToast(`Added to cart!`);
+            window.dispatchEvent(new Event('cart-updated'));
+            window.dispatchEvent(new Event('open-cart-slider'));
+            
+            // Reset state
+            setStep('idle');
+            setSelectedSize(null);
+        } catch (err) {
+            showToast('Failed to add to cart');
+        } finally {
+            setIsAddingToCart(false);
+        }
     };
 
-    // Handle add to cart
+    // Handle add to cart (for products without size selection)
     const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -121,16 +135,15 @@ export default function ProductCard({ product }) {
         try {
             await window.axios.post('/cart/add', { 
                 product_id: product.id, 
-                quantity: quantity,
-                size: selectedSize
+                quantity: 1,
+                size: null
             });
-            showToast(`Added ${quantity} item(s) to cart!`);
+            showToast(`Added to cart!`);
             window.dispatchEvent(new Event('cart-updated'));
             window.dispatchEvent(new Event('open-cart-slider'));
             
             // Reset state
             setStep('idle');
-            setQuantity(1);
             setSelectedSize(null);
         } catch (err) {
             showToast('Failed to add to cart');
@@ -144,7 +157,6 @@ export default function ProductCard({ product }) {
         e.preventDefault();
         e.stopPropagation();
         setStep('idle');
-        setQuantity(1);
         setSelectedSize(null);
     };
 
@@ -186,50 +198,12 @@ export default function ProductCard({ product }) {
                                                         e.stopPropagation();
                                                         handleSizeSelect(size);
                                                     }}
-                                                    className="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center text-[10px] md:text-xs font-bold rounded-full border-2 border-[#be1e2d] text-[#be1e2d] hover:bg-[#be1e2d] hover:text-white transition-all duration-200"
+                                                    disabled={isAddingToCart}
+                                                    className="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center text-[10px] md:text-xs font-bold rounded-full border-2 border-[#be1e2d] text-[#be1e2d] hover:bg-[#be1e2d] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     {size}
                                                 </button>
                                             ))}
-                                        </div>
-                                    )}
-                                    
-                                    {/* Quantity Controls (after size selection) */}
-                                    {step === 'quantity' && (
-                                        <div className="flex items-center gap-0.5 md:gap-1.5">
-                                            {/* Minimized size display */}
-                                            {selectedSize && (
-                                                <span className="text-[10px] md:text-xs font-bold text-[#be1e2d] px-1 md:px-2">
-                                                    {selectedSize}
-                                                </span>
-                                            )}
-                                            
-                                            {/* Quantity controls */}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    setQuantity(Math.max(1, quantity - 1));
-                                                }}
-                                                disabled={quantity <= 1}
-                                                className="w-5 h-5 md:w-7 md:h-7 flex-shrink-0 rounded-full bg-gray-100 hover:bg-[#be1e2d] hover:text-white disabled:opacity-30 disabled:hover:bg-gray-100 disabled:hover:text-current transition-all duration-200 flex items-center justify-center"
-                                            >
-                                                <Minus className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                                            </button>
-                                            
-                                            <span className="text-[10px] md:text-sm font-bold text-gray-900 w-3 md:w-5 text-center">{quantity}</span>
-                                            
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    setQuantity(Math.min(10, quantity + 1));
-                                                }}
-                                                disabled={quantity >= 10}
-                                                className="w-5 h-5 md:w-7 md:h-7 flex-shrink-0 rounded-full bg-gray-100 hover:bg-[#be1e2d] hover:text-white disabled:opacity-30 disabled:hover:bg-gray-100 disabled:hover:text-current transition-all duration-200 flex items-center justify-center"
-                                            >
-                                                <Plus className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -243,8 +217,6 @@ export default function ProductCard({ product }) {
                             >
                                 {isAddingToCart ? (
                                     <div className="w-3.5 h-3.5 md:w-4 md:h-4 border-2 border-[#be1e2d] border-t-transparent rounded-full animate-spin" />
-                                ) : step === 'idle' ? (
-                                    <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 text-[#be1e2d] group-hover/cart:text-white transition-colors" />
                                 ) : step === 'size' ? (
                                     <X className="w-4 h-4 md:w-5 md:h-5 text-[#be1e2d] group-hover/cart:text-white transition-colors" />
                                 ) : (

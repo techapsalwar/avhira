@@ -134,13 +134,13 @@ export default function Dashboard({ stats, revenueData, topProducts, recentOrder
                                 onClick={toggleMaintenanceMode}
                                 className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                                     isMaintenanceMode 
-                                        ? 'bg-avhira-primary focus:ring-avhira-primary' 
+                                        ? 'bg-gray-300 focus:ring-gray-400' 
                                         : 'bg-gray-300 focus:ring-gray-400'
                                 }`}
                             >
                                 <span
                                     className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
-                                        isMaintenanceMode ? 'translate-x-7' : 'translate-x-1'
+                                        isMaintenanceMode ? 'translate-x-7' : 'translate-x-1' 
                                     }`}
                                 />
                             </button>
@@ -392,7 +392,7 @@ export default function Dashboard({ stats, revenueData, topProducts, recentOrder
                                 </button>
                                 <button
                                     onClick={enableMaintenanceMode}
-                                    className="flex-1 px-4 py-2 bg-avhira-primary text-white rounded-lg hover:bg-avhira-primary-dark transition-colors"
+                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                                 >
                                     Enable
                                 </button>
