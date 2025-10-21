@@ -24,6 +24,11 @@ class CheckMaintenanceMode
             return $next($request);
         }
 
+        // Allow access to maintenance page itself (prevent redirect loop)
+        if ($request->is('maintenance')) {
+            return $next($request);
+        }
+
         // Allow access to admin routes
         if ($request->is('admin*')) {
             return $next($request);
