@@ -66,14 +66,24 @@ export default function CartSlider({ isOpen, onClose }) {
         }
     };
 
-    // Calculate totals
-    const subtotal = cartItems.reduce((sum, item) => {
-        const price = item.product.sale_price || item.product.price;
-        return sum + (price * item.quantity);
+    // Calculate totals robustly (handle string prices, missing sale_price)
+    const originalSubtotal = cartItems.reduce((sum, item) => {
+        const priceNum = parseFloat(item.product.price) || 0;
+        return sum + (priceNum * item.quantity);
     }, 0);
 
-    const shipping = subtotal > 0 ? 100 : 0;
-    const total = subtotal + shipping;
+    const discountedSubtotal = cartItems.reduce((sum, item) => {
+        const priceNum = parseFloat(item.product.price) || 0;
+        const saleNumRaw = item.product.sale_price;
+        const saleNum = (saleNumRaw !== null && saleNumRaw !== undefined && saleNumRaw !== '') ? parseFloat(saleNumRaw) : null;
+        const effective = (saleNum !== null && !isNaN(saleNum) && saleNum < priceNum) ? saleNum : priceNum;
+        return sum + (effective * item.quantity);
+    }, 0);
+
+    const totalDiscount = Math.max(0, originalSubtotal - discountedSubtotal);
+
+    const shipping = discountedSubtotal > 0 ? 0 : 0; // keep same shipping logic for now
+    const total = discountedSubtotal + shipping;
 
     return (
         <>
@@ -205,25 +215,35 @@ export default function CartSlider({ isOpen, onClose }) {
                                                     </p>
                                                 )}
 
-                                                <div className="mt-1.5 md:mt-2">
-                                                    <div className="flex items-center gap-1.5 md:gap-2">
-                                                        {product.sale_price && product.sale_price < product.price ? (
-                                                            <>
-                                                                <span className="text-xs text-gray-500 line-through">
-                                                                    {formatPrice(product.price)}
-                                                                </span>
-                                                                <span className="text-sm md:text-base font-bold"
-                                                                      style={{ color: '#be1e2d' }}>
-                                                                    {formatPrice(product.sale_price)}
-                                                                </span>
-                                                            </>
-                                                        ) : (
-                                                            <span className="text-sm md:text-base font-bold text-gray-900">
-                                                                {formatPrice(product.price)}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
+                                                        <div className="mt-1.5 md:mt-2">
+                                                            <div className="flex items-center gap-1.5 md:gap-2">
+                                                                {(() => {
+                                                                    const priceNum = parseFloat(product.price) || 0;
+                                                                    const saleRaw = product.sale_price;
+                                                                    const saleNum = (saleRaw !== null && saleRaw !== undefined && saleRaw !== '') ? parseFloat(saleRaw) : null;
+                                                                    const hasValidSale = (saleNum !== null && !isNaN(saleNum) && saleNum < priceNum);
+
+                                                                    if (hasValidSale) {
+                                                                        return (
+                                                                            <>
+                                                                                <span className="text-xs text-gray-500 line-through">
+                                                                                    {formatPrice(priceNum)}
+                                                                                </span>
+                                                                                <span className="text-sm md:text-base font-bold" style={{ color: '#be1e2d' }}>
+                                                                                    {formatPrice(saleNum)}
+                                                                                </span>
+                                                                            </>
+                                                                        );
+                                                                    }
+
+                                                                    return (
+                                                                        <span className="text-sm md:text-base font-bold text-gray-900">
+                                                                            {formatPrice(priceNum)}
+                                                                        </span>
+                                                                    );
+                                                                })()}
+                                                            </div>
+                                                        </div>
                                             </div>
 
                                             {/* Right Side Controls (Stacked) */}
@@ -276,12 +296,19 @@ export default function CartSlider({ isOpen, onClose }) {
                     {cartItems.length > 0 && (
                         <div className="flex-shrink-0 border-t border-gray-200 px-4 md:px-6 py-2.5 md:py-3"
                              style={{ backgroundColor: '#faf5f6' }}>
-                            {/* Totals - Single Line */}
+                            {/* Totals - Single Line with discount */}
                             <div className="flex items-center justify-between mb-2.5">
-                                <div className="flex items-center gap-3 text-xs md:text-sm text-gray-600">
-                                    <span>Subtotal: <span className="font-medium text-gray-900">{formatPrice(subtotal)}</span></span>
-                                    <span>•</span>
-                                    <span>Shipping: <span className="font-medium text-gray-900">{formatPrice(shipping)}</span></span>
+                                <div className="flex flex-col text-xs md:text-sm text-gray-600">
+                                    <div className="flex items-center gap-3">
+                                        <span>Subtotal: <span className="font-medium text-gray-900">{formatPrice(originalSubtotal)}</span></span>
+                                        <span>•</span>
+                                        <span>Shipping: <span className="font-medium text-gray-900">{formatPrice(shipping)}</span></span>
+                                    </div>
+                                    {totalDiscount > 0 && (
+                                        <div className="text-sm text-green-700 mt-1">
+                                            You saved <span className="font-semibold">{formatPrice(totalDiscount)}</span>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="text-base md:text-lg font-bold" style={{ color: '#be1e2d' }}>
                                     {formatPrice(total)}

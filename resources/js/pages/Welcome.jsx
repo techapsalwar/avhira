@@ -192,8 +192,8 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
             <Head title="Avhira - Premium Clothing Brand" />
             
             {/* Hero Section - Full-Width DomeGallery Background */}
-            <section className="relative min-h-[700px] lg:min-h-[900px] flex items-center overflow-hidden -mt-32 sm:-mt-32 lg:-mt-40" 
-                     style={{ backgroundColor: '#faf5f6' }}>
+            <section className="relative min-h-[580px] sm:min-h-[460px] lg:min-h-[900px] flex items-center overflow-hidden -mt-20 sm:-mt-24 lg:-mt-40" 
+                     style={{ backgroundColor: 'rgba(250, 245, 246, 0)' }}>
                 
                 {/* Full-Width DomeGallery Background */}
                 <div className="absolute inset-0 z-0">
@@ -205,8 +205,8 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
                         maxVerticalRotationDeg={2}
                         grayscale={false}
                         imageBorderRadius="30px"
-                        openedImageWidth="600px"
-                        openedImageHeight="650px"
+                        openedImageWidth="400px"
+                        openedImageHeight="450px"
                     />
                 </div>
 

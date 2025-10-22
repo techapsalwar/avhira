@@ -354,8 +354,8 @@ export default function MainLayout({ children }) {
                 )}
             </nav>
 
-            {/* Spacer so content doesn't sit under the fixed nav */}
-            <div className="h-32"></div>
+            {/* Spacer so content doesn't sit under the fixed nav (hidden on small screens so hero can touch top) */}
+            <div className="hidden md:block h-32"></div>
 
             {/* Main Content */}
             <main className="pt-0 sm:pt-8">
