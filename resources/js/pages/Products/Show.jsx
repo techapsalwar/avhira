@@ -68,6 +68,26 @@ export default function Show({ product }) {
                     <div className="space-y-4">
                         {/* Main Image/Video Display */}
                         <div className="aspect-square w-full overflow-hidden rounded-2xl bg-avhira-bg shadow-lg relative">
+                            {/* Left Arrow */}
+                            {imageUrls.length > 1 && !showVideo && (
+                                <button
+                                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white/90 text-gray-700 rounded-full p-2 shadow transition-all focus:outline-none"
+                                    style={{ backdropFilter: 'blur(2px)' }}
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        const currentIdx = imageUrls.indexOf(activeImage);
+                                        const prevIdx = (currentIdx - 1 + imageUrls.length) % imageUrls.length;
+                                        setActiveImage(imageUrls[prevIdx]);
+                                        setShowVideo(false);
+                                    }}
+                                    aria-label="Previous image"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                            )}
+                            {/* Main Image/Video */}
                             {showVideo && hasVideo ? (
                                 <video
                                     src={product.video_url}
@@ -81,10 +101,28 @@ export default function Show({ product }) {
                                 <img
                                     src={activeImage}
                                     alt={product.name}
-                                    className="h-full w-full object-cover object-center"
+                                    className="h-full w-full object-cover object-center select-none"
                                 />
                             )}
-                            
+                            {/* Right Arrow */}
+                            {imageUrls.length > 1 && !showVideo && (
+                                <button
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white/70 hover:bg-white/90 text-gray-700 rounded-full p-2 shadow transition-all focus:outline-none"
+                                    style={{ backdropFilter: 'blur(2px)' }}
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        const currentIdx = imageUrls.indexOf(activeImage);
+                                        const nextIdx = (currentIdx + 1) % imageUrls.length;
+                                        setActiveImage(imageUrls[nextIdx]);
+                                        setShowVideo(false);
+                                    }}
+                                    aria-label="Next image"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            )}
                             {/* Discount Badge */}
                             {hasDiscount && !showVideo && (
                                 <div className="absolute top-4 right-4 bg-[#be1e2d] text-white px-4 py-2 rounded-full font-bold text-lg shadow-lg">

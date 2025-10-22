@@ -31,8 +31,9 @@ class WelcomeController extends Controller
 
         $forHim = $featuredProducts->filter(function ($product) {
             $categoryName = strtolower($product->subcategory->mainCategory->name ?? '');
-            return str_contains($categoryName, 'men') || 
-                   str_contains($categoryName, 'man') || 
+            // Check for men/man/boy but NOT women (avoid matching 'men' in 'women')
+            return (str_contains($categoryName, 'men') && !str_contains($categoryName, 'women')) || 
+                   (str_contains($categoryName, 'man') && !str_contains($categoryName, 'woman')) || 
                    str_contains($categoryName, 'boy') ||
                    str_contains($categoryName, 'gents') ||
                    str_contains($categoryName, 'male');

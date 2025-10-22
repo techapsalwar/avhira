@@ -162,6 +162,22 @@ export default function ProductCard({ product }) {
 
     return (
         <div className="group relative rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+            {/* Image index dots - top left corner */}
+            {imageUrls.length > 1 && (
+                <div className="absolute top-3 left-3 z-30 flex gap-1.5">
+                    {[0, 1, 2, 3].map((idx) => (
+                        <span
+                            key={idx}
+                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                                currentImageIndex % 4 === idx
+                                    ? 'bg-[#be1e2d] scale-110 shadow-md'
+                                    : 'bg-gray-300 opacity-60'
+                            }`}
+                            style={{ boxShadow: currentImageIndex % 4 === idx ? '0 0 0 2px #fff' : undefined }}
+                        />
+                    ))}
+                </div>
+            )}
             {/* Discount badge */}
             {hasDiscount && (
                 <div className="absolute top-4 right-4 z-30 bg-[#be1e2d] text-white text-xs font-bold rounded-full px-3 py-1.5 shadow-lg">

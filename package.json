@@ -21,6 +21,7 @@
         "prettier": "^3.4.2",
         "prettier-plugin-organize-imports": "^4.1.0",
         "prettier-plugin-tailwindcss": "^0.6.11",
+        "rollup": "^4.52.5",
         "typescript-eslint": "^8.23.0"
     },
     "dependencies": {
@@ -42,6 +43,7 @@
         "@tailwindcss/vite": "^4.1.11",
         "@types/react": "^19.0.3",
         "@types/react-dom": "^19.0.2",
+        "@use-gesture/react": "^10.3.1",
         "@vitejs/plugin-react": "^4.6.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -62,9 +64,9 @@
     },
     "optionalDependencies": {
         "@rollup/rollup-linux-x64-gnu": "4.9.5",
-        "@rollup/rollup-win32-x64-msvc": "^4.52.4",
+        "@rollup/rollup-win32-x64-msvc": "^4.52.5",
         "@tailwindcss/oxide-linux-x64-gnu": "^4.0.1",
-        "@tailwindcss/oxide-win32-x64-msvc": "^4.1.14",
+        "@tailwindcss/oxide-win32-x64-msvc": "^4.1.15",
         "lightningcss-linux-x64-gnu": "^1.29.1",
         "lightningcss-win32-x64-msvc": "^1.30.2"
     }

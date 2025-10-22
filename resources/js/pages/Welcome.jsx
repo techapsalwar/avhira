@@ -3,7 +3,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import ProductCard from '@/Components/ProductCard';
-import CardSwap, { Card } from '@/Components/CardSwap';
+import DomeGallery from '@/Components/DomeGallery';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/Components/GlobalToastProvider';
 
@@ -27,11 +27,38 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
     const [years, setYears] = useState(0);
     const [hasAnimated, setHasAnimated] = useState(false);
     const heroImages = [
-        '/images/hero/product-1.png',
-        '/images/hero/product-2.png',
-        '/images/hero/product-3.png',
-        '/images/hero/product-4.png',
-        '/images/hero/product-5.png',
+        '/images/hero/1.png',
+        '/images/hero/2.png',
+        '/images/hero/3.png',
+        '/images/hero/4.png',
+        '/images/hero/5.png',
+        '/images/hero/6.png',
+        '/images/hero/7.png',
+        '/images/hero/8.png',
+        '/images/hero/9.png',
+        '/images/hero/10.png',
+        '/images/hero/11.png',
+        '/images/hero/12.png',
+        '/images/hero/13.png',
+        '/images/hero/14.png',
+        '/images/hero/15.png',
+        '/images/hero/16.png',
+        '/images/hero/17.png',
+        '/images/hero/18.png',
+        '/images/hero/19.png',
+        '/images/hero/20.png',
+        '/images/hero/21.png',
+        '/images/hero/22.png',
+        '/images/hero/23.png',
+        '/images/hero/24.png',
+        '/images/hero/25.png',
+        '/images/hero/26.png',
+        '/images/hero/27.png',
+        '/images/hero/28.png',
+        '/images/hero/29.png',
+        '/images/hero/30.png',
+
+
         
     ];
 
@@ -164,172 +191,61 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
         <MainLayout>
             <Head title="Avhira - Premium Clothing Brand" />
             
-            {/* Hero Section - Modern Layout Inspired Design */}
+            {/* Hero Section - Full-Width DomeGallery Background */}
             <section className="relative min-h-[700px] lg:min-h-[900px] flex items-center overflow-hidden -mt-32 sm:-mt-32 lg:-mt-40" 
                      style={{ backgroundColor: '#faf5f6' }}>
                 
-                {/* Decorative Pattern Overlay */}
-                <div className="absolute inset-0 opacity-[0.03]">
-                    <div className="absolute inset-0" style={{
-                        backgroundImage: `radial-gradient(circle at 2px 2px, rgba(190, 30, 45, 0.8) 1px, transparent 0)`,
-                        backgroundSize: '48px 48px'
-                    }} />
+                {/* Full-Width DomeGallery Background */}
+                <div className="absolute inset-0 z-0">
+                    <DomeGallery
+                        images={heroImages}
+                        fit={1}
+                        segments={30}
+                        dragSensitivity={15}
+                        maxVerticalRotationDeg={2}
+                        grayscale={false}
+                        imageBorderRadius="30px"
+                        openedImageWidth="600px"
+                        openedImageHeight="650px"
+                    />
                 </div>
 
-                <div className="container mx-auto px-4 lg:px-8 xl:px-16 relative z-10 max-w-[1600px]">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-4 xl:gap-6 items-center">
-                        
-                        {/* Left Content */}
-                        <div className="order-2 lg:order-1 space-y-4 lg:space-y-6 animate-fade-in pl-4 lg:pl-8 xl:pl-12">
-                            
-                                                        <div className="order-1 pt-32 sm:pt-36 lg:pt-0">
-                                                            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-4">
-                                                                <span className="block text-gray-900">Timeless prints,</span>
-                                                                <span className="block" style={{ color: '#be1e2d' }}>reimagined for</span>
-                                                                <span className="block text-gray-900">modern living</span>
-                                                            </h1>
-                                                        </div>
-
-                                                        {/* Mobile CardSwap with Stats - Shows second on mobile, hidden on desktop */}
-                            <div className="order-2 lg:hidden relative animate-fade-in flex items-center justify-start gap-4 py-0" style={{ animationDelay: '0.2s' }}>
-                                {/* Vertical Stats - Left Side */}
-                                <div className="flex flex-col gap-8 justify-center pl-0">
-                                    <div className="text-left">
-                                        <div className="text-3xl sm:text-4xl font-bold mb-1 tabular-nums" 
-                                             style={{ color: '#be1e2d' }}>
-                                            {designs}+
+                
+                
+                                <div className="container mx-auto px-4 lg:px-8 xl:px-16 relative z-10 max-w-[1600px] pointer-events-none flex items-end min-h-[700px] lg:min-h-[900px] pb-12 lg:pb-16">
+                                    <div className="max-w-3xl">
+                                        {/* Main Heading */}
+                                        <div className="mb-6 animate-fade-in">
+                                            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-4">
+                                                <span className="block text-white" style={{ 
+                                                    textShadow: '0 2px 4px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2), 0 0 2px rgba(0,0,0,0.5)'
+                                                }}>Welcome to the</span>
+                                                <span className="block" style={{ 
+                                                    color: '#be1e2d',
+                                                    textShadow: '0 2px 4px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3), 0 0 2px rgba(0,0,0,0.6), 0 0 20px rgba(190, 30, 45, 0.3)'
+                                                }}>World of Avhira</span>
+                                                
+                                            </h1>
                                         </div>
-                                        <div className="text-xs sm:text-sm text-gray-600 font-medium leading-tight max-w-[100px]">
-                                            Premium Designs
-                                        </div>
-                                    </div>
-                                    <div className="text-left">
-                                        <div className="text-3xl sm:text-4xl font-bold mb-1 tabular-nums" 
-                                             style={{ color: '#be1e2d' }}>
-                                            {prints}+
-                                        </div>
-                                        <div className="text-xs sm:text-sm text-gray-600 font-medium leading-tight max-w-[80px]">
-                                            Artisan Prints
-                                        </div>
-                                    </div>
-                                    <div className="text-left">
-                                        <div className="text-3xl sm:text-4xl font-bold mb-1 tabular-nums" 
-                                             style={{ color: '#be1e2d' }}>
-                                            {years}+
-                                        </div>
-                                        <div className="text-xs sm:text-sm text-gray-600 font-medium leading-tight max-w-[80px]">
-                                            Years Legacy
-                                        </div>
-                                    </div>
-                                </div>
 
-                                {/* CardSwap */}
-                                <CardSwap
-                                    width={window.innerWidth < 640 ? 220 : 280}
-                                    height={window.innerWidth < 640 ? 300 : 380}
-                                    cardDistance={65}
-                                    verticalDistance={50}
-                                    delay={4000}
-                                    pauseOnHover={false}
-                                    skewAmount={3}
-                                    easing="elastic"
-                                >
-                                    {heroImages.map((image, index) => (
-                                        <Card key={index} customClass="hero-card">
-                                            <img
-                                                src={image}
-                                                alt={`Avhira Collection ${index + 1}`}
-                                                onError={(e) => {
-                                                    e.target.src = 'https://via.placeholder.com/420x560.png?text=No+Image';
-                                                }}
-                                            />
-                                        </Card>
-                                    ))}
-                                </CardSwap>
-                            </div>
-
-                            {/* Description - Shows third on mobile */}
-                            <div className="order-3 -mt-4">
-                                <p className="text-base sm:text-lg lg:text-xl text-gray-700 leading-relaxed max-w-xl">
-                                    Handcrafted premium cotton, rooted in tradition, refined for the modern wardrobe.
-                                </p>
-                            </div>
-
-                            {/* CTA Button */}
-                            <div className="order-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                                <Link 
-                                    href="/products" 
-                                    className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold text-base lg:text-lg text-white transition-all transform hover:scale-105 hover:shadow-xl shadow-lg"
-                                    style={{ backgroundColor: '#be1e2d' }}
-                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9a1824'}
-                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#be1e2d'}
-                                >
-                                    Explore More
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                    </svg>
-                                </Link>
-                            </div>
-
-                            {/* Stats Grid - Desktop Only */}
-                            <div className="hidden lg:grid order-5 grid-cols-3 gap-6 lg:gap-8 pt-6 lg:pt-8 border-t border-gray-300 animate-fade-in" 
-                                 style={{ animationDelay: '0.4s' }}>
-                                <div>
-                                    <div className="text-3xl lg:text-4xl xl:text-5xl font-bold mb-1 tabular-nums" 
-                                         style={{ color: '#be1e2d' }}>
-                                        {designs}+
-                                    </div>
-                                    <div className="text-sm lg:text-base text-gray-600 font-medium">
-                                        Premium Designs
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="text-3xl lg:text-4xl xl:text-5xl font-bold mb-1 tabular-nums" 
-                                         style={{ color: '#be1e2d' }}>
-                                        {prints}+
-                                    </div>
-                                    <div className="text-sm lg:text-base text-gray-600 font-medium">
-                                        Artisan Prints
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="text-3xl lg:text-4xl xl:text-5xl font-bold mb-1 tabular-nums" 
-                                         style={{ color: '#be1e2d' }}>
-                                        {years}+
-                                    </div>
-                                    <div className="text-sm lg:text-base text-gray-600 font-medium">
-                                        Years Legacy
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Right Content - CardSwap Showcase (Desktop only) */}
-                        <div className="hidden lg:flex order-1 lg:order-2 relative animate-fade-in items-center justify-center" style={{ animationDelay: '0.2s' }}>
-                            <CardSwap
-                                width={window.innerWidth < 1024 ? 350 : 420}
-                                height={window.innerWidth < 1024 ? 480 : 560}
-                                cardDistance={65}
-                                verticalDistance={50}
-                                delay={4000}
-                                pauseOnHover={false}
-                                skewAmount={3}
-                                easing="elastic"
+                                        {/* CTA Button */}
+                        <div className="mb-12 animate-fade-in pointer-events-auto" style={{ animationDelay: '0.2s' }}>
+                            <Link 
+                                href="/products" 
+                                className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold text-base lg:text-lg text-white transition-all transform hover:scale-105 hover:shadow-2xl shadow-xl backdrop-blur-sm"
+                                style={{ backgroundColor: '#be1e2d' }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9a1824'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#be1e2d'}
                             >
-                                {heroImages.map((image, index) => (
-                                    <Card key={index} customClass="hero-card">
-                                        <img
-                                            src={image}
-                                            alt={`Avhira Collection ${index + 1}`}
-                                            onError={(e) => {
-                                                e.target.src = 'https://via.placeholder.com/420x560.png?text=No+Image';
-                                            }}
-                                        />
-                                    </Card>
-                                ))}
-                            </CardSwap>
+                                Explore More
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </Link>
                         </div>
 
+                        {/* Stats Grid */}
+                        
                     </div>
                 </div>
             </section>
