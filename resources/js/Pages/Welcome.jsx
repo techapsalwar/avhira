@@ -213,7 +213,11 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
                 
                 
                                 <div className="container mx-auto px-4 lg:px-8 xl:px-16 relative z-10 max-w-[1600px] pointer-events-none flex items-end min-h-[700px] lg:min-h-[900px] pb-12 lg:pb-16">
-                                    <div className="max-w-3xl">
+                                    {/* Mobile-only lower overlay: covers bottom ~40% to improve text/CTA contrast on small screens
+                                        This overlay captures pointer events to block interactions with the DomeGallery under it */}
+                             <div className="absolute left-0 right-0 bottom-0 block lg:hidden"
+                                 style={{ height: '40%', background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0, 0, 0, 0) 100%)', zIndex: 5, pointerEvents: 'auto', touchAction: 'pan-y' }} />
+                                    <div className="max-w-3xl pointer-events-auto relative z-20">
                                         {/* Main Heading */}
                                         <div className="mb-6 animate-fade-in">
                                             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight mb-4">
