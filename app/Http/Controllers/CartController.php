@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
@@ -48,6 +49,59 @@ class CartController extends Controller
         }
 
         return response()->json(['success' => true, 'cart' => $cart]);
+    }
+
+    /**
+     * Merge guest cart items into authenticated user's cart (atomic)
+     */
+    public function mergeGuest(Request $request)
+    {
+        $userId = Auth::id();
+        if (!$userId) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        Log::info('mergeGuest called', ['user_id' => $userId, 'payload' => $request->all()]);
+
+        $data = $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.size' => 'nullable|string',
+        ]);
+
+        $items = $data['items'];
+
+        DB::beginTransaction();
+        try {
+            foreach ($items as $it) {
+                $existing = Cart::where('user_id', $userId)
+                    ->where('product_id', $it['product_id'])
+                    ->where('size', $it['size'] ?? null)
+                    ->first();
+
+                if ($existing) {
+                    $existing->quantity += $it['quantity'];
+                    $existing->save();
+                } else {
+                    Cart::create([
+                        'user_id' => $userId,
+                        'session_id' => null,
+                        'product_id' => $it['product_id'],
+                        'size' => $it['size'] ?? null,
+                        'quantity' => $it['quantity'],
+                    ]);
+                }
+            }
+
+            DB::commit();
+            Log::info('mergeGuest success', ['user_id' => $userId, 'merged_count' => count($items)]);
+            return response()->json(['success' => true, 'merged_count' => count($items)]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Failed to merge guest cart: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to merge guest cart'], 500);
+        }
     }
 
     /**

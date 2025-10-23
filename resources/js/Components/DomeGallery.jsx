@@ -278,20 +278,38 @@ export default function DomeGallery({
 
   useGesture(
     {
+      // Only allow horizontal drag to interact with DomeGallery; vertical drag should scroll the page
       onDragStart: ({ event }) => {
         if (focusedElRef.current) return;
         stopInertia();
         const evt = event;
-        draggingRef.current = true;
         movedRef.current = false;
         startRotRef.current = { ...rotationRef.current };
         startPosRef.current = { x: evt.clientX, y: evt.clientY };
+        draggingRef.current = null; // Will be set to true if horizontal drag detected
       },
       onDrag: ({ event, last, velocity = [0, 0], direction = [0, 0], movement }) => {
-        if (focusedElRef.current || !draggingRef.current || !startPosRef.current) return;
+        if (focusedElRef.current || !startPosRef.current) return;
         const evt = event;
         const dxTotal = evt.clientX - startPosRef.current.x;
         const dyTotal = evt.clientY - startPosRef.current.y;
+        // On first significant movement, determine direction
+        if (draggingRef.current === null) {
+          if (Math.abs(dxTotal) > 8 || Math.abs(dyTotal) > 8) {
+            if (Math.abs(dxTotal) > Math.abs(dyTotal)) {
+              draggingRef.current = true; // Horizontal drag: handle gallery
+              // Prevent vertical scroll
+              if (evt.cancelable) evt.preventDefault();
+            } else {
+              draggingRef.current = false; // Vertical drag: let page scroll
+              return;
+            }
+          } else {
+            // Not enough movement yet to determine
+            return;
+          }
+        }
+        if (!draggingRef.current) return; // Only handle if horizontal drag
         if (!movedRef.current) {
           const dist2 = dxTotal * dxTotal + dyTotal * dyTotal;
           if (dist2 > 16) movedRef.current = true;
@@ -323,7 +341,8 @@ export default function DomeGallery({
         }
       }
     },
-    { target: mainRef, eventOptions: { passive: true } }
+  // Use passive: false so we can call preventDefault only for horizontal drags
+  { target: mainRef, eventOptions: { passive: false } }
   );
 
   useEffect(() => {

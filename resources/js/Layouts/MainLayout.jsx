@@ -12,6 +12,7 @@ export default function MainLayout({ children }) {
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const [cartSliderOpen, setCartSliderOpen] = useState(false);
     const [compact, setCompact] = useState(false);
+    const [restoring, setRestoring] = useState(false);
     const lastY = useRef(0);
 
     // Derive current pathname
@@ -65,16 +66,80 @@ export default function MainLayout({ children }) {
         }
     };
 
+    const handleLogout = async (e) => {
+        e && e.preventDefault();
+        try {
+            // Use axios to POST logout then force a full reload so CSRF/meta tags are refreshed
+            await window.axios.post('/logout');
+            window.location.href = '/';
+        } catch (err) {
+            console.error('Logout failed, falling back to full navigation', err);
+            // Fallback: navigate to root which will clear client state
+            window.location.href = '/';
+        }
+    };
+
     useEffect(() => {
         fetchCartCount();
         window.addEventListener('cart-updated', fetchCartCount);
         return () => window.removeEventListener('cart-updated', fetchCartCount);
     }, []);
 
+    // If user just logged in and there's a guest cart saved, restore it server-side
+    useEffect(() => {
+        const tryRestoreGuestCart = async () => {
+            try {
+                if (!auth?.user) return;
+                const raw = sessionStorage.getItem('guestCartToRestore');
+                const redirect = sessionStorage.getItem('postAuthRedirect');
+                if (!raw) return;
+                let items = [];
+                try { items = JSON.parse(raw); } catch (e) { console.warn('Failed parse guestCartToRestore', e); }
+                if (!Array.isArray(items) || items.length === 0) {
+                    sessionStorage.removeItem('guestCartToRestore');
+                    return;
+                }
+
+                setRestoring(true);
+                try {
+                    // Small delay to ensure auth session/cookies are fully established after login reload
+                    await new Promise((resolve) => setTimeout(resolve, 500));
+                    console.debug('MainLayout: calling /cart/merge-guest with items', items);
+                    const res = await window.axios.post('/cart/merge-guest', { items });
+                    console.debug('MainLayout: merge-guest response', res && res.data ? res.data : res);
+                    // helpful toast for debugging in the browser
+                    try { window.dispatchEvent(new Event('cart-updated')); } catch(e) {}
+                } catch (e) {
+                    console.warn('MainLayout: merge-guest failed', e);
+                    try { window.dispatchEvent(new Event('cart-updated')); } catch(e) {}
+                } finally {
+                    setRestoring(false);
+                }
+
+                sessionStorage.removeItem('guestCartToRestore');
+
+                if (redirect) {
+                    sessionStorage.removeItem('postAuthRedirect');
+                    window.location.href = redirect;
+                }
+            } catch (e) {
+                console.error('Error restoring guest cart in MainLayout', e);
+                setRestoring(false);
+            }
+        };
+
+        tryRestoreGuestCart();
+    }, [auth]);
+
     useEffect(() => {
         const handleOpenCart = () => setCartSliderOpen(true);
+        const handleOpenAuth = () => setAuthModalOpen(true);
         window.addEventListener('open-cart-slider', handleOpenCart);
-        return () => window.removeEventListener('open-cart-slider', handleOpenCart);
+        window.addEventListener('open-auth-modal', handleOpenAuth);
+        return () => {
+            window.removeEventListener('open-cart-slider', handleOpenCart);
+            window.removeEventListener('open-auth-modal', handleOpenAuth);
+        };
     }, []);
 
     useEffect(() => {
@@ -160,6 +225,11 @@ export default function MainLayout({ children }) {
 
                     {/* Right Side Actions */}
                     <div className="flex items-center space-x-4">
+                        {restoring && (
+                            <div className="text-sm text-gray-600 mr-2 hidden sm:block">
+                                Restoring cart...
+                            </div>
+                        )}
                         {/* Mobile Menu Button */}
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -257,14 +327,12 @@ export default function MainLayout({ children }) {
                                         Profile
                                     </Link>
                                     <div className="border-t border-gray-100"></div>
-                                    <Link 
-                                        href="/logout" 
-                                        method="post" 
-                                        as="button"
+                                    <button
+                                        onClick={handleLogout}
                                         className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-avhira-bg hover:text-avhira-red transition-colors"
                                     >
                                         Logout
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
                         ) : (
@@ -323,15 +391,12 @@ export default function MainLayout({ children }) {
                                         >
                                             My Orders
                                         </Link>
-                                        <Link 
-                                            href="/logout" 
-                                            method="post" 
-                                            as="button"
-                                            onClick={() => setMobileMenuOpen(false)}
+                                        <button
+                                            onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
                                             className="text-sm text-gray-700 px-4 py-2 hover:bg-gray-50 rounded-lg text-left"
                                         >
                                             Logout
-                                        </Link>
+                                        </button>
                                     </>
                                 ) : (
                                     <>
@@ -355,7 +420,7 @@ export default function MainLayout({ children }) {
             </nav>
 
             {/* Spacer so content doesn't sit under the fixed nav (hidden on small screens so hero can touch top) */}
-            <div className="hidden md:block h-32"></div>
+            <div className="h-32"></div>
 
             {/* Main Content */}
             <main className="pt-0 sm:pt-8">

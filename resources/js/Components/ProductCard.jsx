@@ -32,7 +32,15 @@ export default function ProductCard({ product }) {
         console.error("Failed to parse product images:", e);
     }
     
-    const mainImage = imageUrls.length > 0 ? imageUrls[currentImageIndex] : 'https://via.placeholder.com/400x400.png?text=No+Image';
+    // Inline SVG placeholder to avoid external DNS failures
+    const svgPlaceholder400 = `data:image/svg+xml;utf8,${encodeURIComponent(`
+        <svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'>
+            <rect width='100%' height='100%' fill='%23f3f4f6' />
+            <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-family='Arial, Helvetica, sans-serif' font-size='20'>No Image</text>
+        </svg>
+    `)}`;
+
+    const mainImage = imageUrls.length > 0 ? imageUrls[currentImageIndex] : svgPlaceholder400;
 
     const { showToast } = useToast();
 

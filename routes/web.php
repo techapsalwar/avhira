@@ -28,6 +28,8 @@ Route::get('/categories/{mainCategory:slug}/{subcategory:slug}', [CategoryContro
 
 // Cart
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+// Merge guest cart into authenticated user's cart
+Route::post('/cart/merge-guest', [CartController::class, 'mergeGuest'])->middleware('auth')->name('cart.merge_guest');
 Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
 Route::get('/cart/items', [CartController::class, 'items'])->name('cart.items');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');

@@ -34,9 +34,10 @@ export default function AuthModal({ isOpen, onClose }) {
             
             showToast('Login successful!', 'success');
             onClose();
-            
-            // Reload the page to refresh auth state
-            router.reload();
+
+            // Force a full page navigation to ensure auth cookies/session are established
+            // before MainLayout attempts to restore any saved guest cart.
+            window.location.href = window.location.href;
             
         } catch (error) {
             if (error.response?.data?.errors) {
@@ -59,9 +60,10 @@ export default function AuthModal({ isOpen, onClose }) {
             
             showToast('Registration successful!', 'success');
             onClose();
-            
-            // Reload the page to refresh auth state
-            router.reload();
+
+            // Force a full page navigation to ensure auth cookies/session are established
+            // before MainLayout attempts to restore any saved guest cart.
+            window.location.href = window.location.href;
             
         } catch (error) {
             if (error.response?.data?.errors) {

@@ -171,7 +171,13 @@ export default function CartSlider({ isOpen, onClose }) {
                             <div className="space-y-3 md:space-y-4">
                                 {cartItems.map((item) => {
                                     const product = item.product;
-                                    let imageUrl = 'https://via.placeholder.com/100x100.png?text=No+Image';
+                                    const svgPlaceholder100 = `data:image/svg+xml;utf8,${encodeURIComponent(`
+                                        <svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'>
+                                            <rect width='100%' height='100%' fill='%23f3f4f6' />
+                                            <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-family='Arial, Helvetica, sans-serif' font-size='10'>No Image</text>
+                                        </svg>
+                                    `)}`;
+                                    let imageUrl = svgPlaceholder100;
                                     
                                     try {
                                         const images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;

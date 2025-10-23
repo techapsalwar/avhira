@@ -45,14 +45,24 @@ export default function CartIndex({ cartItems }) {
         }
     };
 
-    // Calculate totals
-    const subtotal = cartItems.reduce((sum, item) => {
-        const price = item.product.sale_price || item.product.price;
-        return sum + (price * item.quantity);
+    // Calculate totals robustly (handle string prices, missing sale_price)
+    const originalSubtotal = cartItems.reduce((sum, item) => {
+        const priceNum = parseFloat(item.product.price) || 0;
+        return sum + (priceNum * item.quantity);
     }, 0);
 
-    const shipping = subtotal > 0 ? 100 : 0; // ₹100 flat shipping
-    const total = subtotal + shipping;
+    const discountedSubtotal = cartItems.reduce((sum, item) => {
+        const priceNum = parseFloat(item.product.price) || 0;
+        const saleNumRaw = item.product.sale_price;
+        const saleNum = (saleNumRaw !== null && saleNumRaw !== undefined && saleNumRaw !== '') ? parseFloat(saleNumRaw) : null;
+        const effective = (saleNum !== null && !isNaN(saleNum) && saleNum < priceNum) ? saleNum : priceNum;
+        return sum + (effective * item.quantity);
+    }, 0);
+
+    const totalDiscount = Math.max(0, originalSubtotal - discountedSubtotal);
+
+    const shipping = discountedSubtotal > 0 ? 0 : 0; // keep same shipping logic for now
+    const total = discountedSubtotal + shipping;
 
     return (
         <MainLayout>
@@ -126,20 +136,31 @@ export default function CartIndex({ cartItems }) {
                                                     )}
 
                                                     <div className="mt-2 flex items-center gap-3">
-                                                        {product.sale_price && product.sale_price < product.price ? (
-                                                            <>
-                                                                <span className="text-sm text-gray-500 line-through">
-                                                                    {formatPrice(product.price)}
+                                                        {(() => {
+                                                            const priceNum = parseFloat(product.price) || 0;
+                                                            const saleRaw = product.sale_price;
+                                                            const saleNum = (saleRaw !== null && saleRaw !== undefined && saleRaw !== '') ? parseFloat(saleRaw) : null;
+                                                            const hasValidSale = (saleNum !== null && !isNaN(saleNum) && saleNum < priceNum);
+
+                                                            if (hasValidSale) {
+                                                                return (
+                                                                    <>
+                                                                        <span className="text-sm text-gray-500 line-through">
+                                                                            {formatPrice(priceNum)}
+                                                                        </span>
+                                                                        <span className="text-lg font-bold text-avhira-red">
+                                                                            {formatPrice(saleNum)}
+                                                                        </span>
+                                                                    </>
+                                                                );
+                                                            }
+
+                                                            return (
+                                                                <span className="text-lg font-bold text-gray-900">
+                                                                    {formatPrice(priceNum)}
                                                                 </span>
-                                                                <span className="text-lg font-bold text-avhira-red">
-                                                                    {formatPrice(product.sale_price)}
-                                                                </span>
-                                                            </>
-                                                        ) : (
-                                                            <span className="text-lg font-bold text-gray-900">
-                                                                {formatPrice(product.price)}
-                                                            </span>
-                                                        )}
+                                                            );
+                                                        })()}
                                                     </div>
                                                 </div>
 
@@ -194,27 +215,54 @@ export default function CartIndex({ cartItems }) {
                                     <div className="space-y-3 mb-6">
                                         <div className="flex justify-between text-gray-600">
                                             <span>Subtotal</span>
-                                            <span className="font-medium">{formatPrice(subtotal)}</span>
+                                            <span className="font-medium">{formatPrice(originalSubtotal)}</span>
                                         </div>
                                         <div className="flex justify-between text-gray-600">
                                             <span>Shipping</span>
                                             <span className="font-medium">{formatPrice(shipping)}</span>
                                         </div>
+                                        {totalDiscount > 0 && (
+                                            <div className="flex justify-between text-green-700">
+                                                <span>Total Discount</span>
+                                                <span className="font-medium">{formatPrice(totalDiscount)}</span>
+                                            </div>
+                                        )}
                                         <div className="border-t pt-3 flex justify-between text-lg font-bold text-gray-900">
                                             <span>Total</span>
                                             <span>{formatPrice(total)}</span>
                                         </div>
                                     </div>
 
-                                    <Link
-                                        href="/checkout"
+                                    <button
+                                        type="button"
                                         className="block w-full text-center py-3 px-4 rounded-lg font-semibold shadow-lg transition-all mb-3"
                                         style={{ backgroundColor: '#be1e2d', color: '#faf5f6' }}
                                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#9a1824'}
                                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#be1e2d'}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            // If user is authenticated, go directly to checkout
+                                            try {
+                                                const auth = window.page?.props?.auth;
+                                                if (auth && auth.user) {
+                                                    router.visit('/checkout');
+                                                    return;
+                                                }
+                                            } catch (err) {
+                                                // ignore
+                                            }
+
+                                            // Guest: save redirect and cart contents so we can restore after login
+                                            try {
+                                                sessionStorage.setItem('postAuthRedirect', '/checkout');
+                                                const toSave = cartItems.map(i => ({ product_id: i.product.id, quantity: i.quantity, size: i.size || null }));
+                                                sessionStorage.setItem('guestCartToRestore', JSON.stringify(toSave));
+                                            } catch (e) {}
+                                            window.dispatchEvent(new Event('open-auth-modal'));
+                                        }}
                                     >
                                         Proceed to Checkout
-                                    </Link>
+                                    </button>
 
                                     <Link
                                         href="/products"
