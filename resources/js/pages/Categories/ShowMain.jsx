@@ -132,37 +132,7 @@ export default function ShowMain({ mainCategory, products, totalProducts }) {
                     </div>
                 </div>
 
-                {/* Subcategory Quick Links */}
-                {mainCategory.subcategories && mainCategory.subcategories.length > 0 && (
-                    <div className="mb-8 flex flex-wrap gap-3">
-                        <button
-                            onClick={() => setSelectedSubcategory('all')}
-                            className={`px-6 py-2 rounded-full font-medium transition-all ${
-                                selectedSubcategory === 'all'
-                                    ? 'bg-avhira-red text-white shadow-md'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                        >
-                            All
-                        </button>
-                        {mainCategory.subcategories.map(subcategory => (
-                            <button
-                                key={subcategory.id}
-                                onClick={() => setSelectedSubcategory(subcategory.id.toString())}
-                                className={`px-6 py-2 rounded-full font-medium transition-all ${
-                                    selectedSubcategory === subcategory.id.toString()
-                                        ? 'bg-avhira-red text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                            >
-                                {subcategory.name}
-                                <span className="ml-2 text-xs opacity-75">
-                                    ({subcategory.products_count || 0})
-                                </span>
-                            </button>
-                        ))}
-                    </div>
-                )}
+                
 
                 {/* Products Grid */}
                 {sortedProducts.length > 0 ? (

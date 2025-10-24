@@ -210,10 +210,11 @@ export default function ProductCard({ product }) {
                         <div className="flex items-center justify-end gap-1 md:gap-2 px-2 pb-2 md:p-0">
                             {/* Horizontal sliding bar - slides from right */}
                             {step !== 'idle' && (
-                                <div className="animate-in slide-in-from-right duration-300 flex items-center gap-1 md:gap-2 bg-white/95 backdrop-blur-sm rounded-full px-2 md:px-4 py-1.5 md:py-3 shadow-lg h-9 md:h-12 max-w-[calc(100%-2.5rem)] md:max-w-none">
+                                <div className="animate-in slide-in-from-right duration-300 flex items-center gap-1 md:gap-2 bg-white/95 backdrop-blur-sm rounded-full md:rounded-lg px-2 md:px-3 py-1.5 md:py-2 shadow-lg h-9 md:h-auto max-w-[calc(100%-2.5rem)] md:max-w-full md:max-h-24 overflow-hidden">
                                     {/* Size Selector */}
                                     {step === 'size' && (
-                                        <div className="flex items-center gap-0.5 md:gap-1.5 overflow-x-auto scrollbar-hide">
+                                        // Mobile: horizontal scroller; Desktop (md+): allow wrapping into multiple rows and cap height
+                                        <div className="flex items-center gap-0.5 md:gap-2 overflow-x-auto md:overflow-visible scrollbar-hide md:flex-wrap md:max-w-[14rem] md:max-h-20">
                                             {availableSizes.map((size, index) => (
                                                 <button
                                                     key={index}
@@ -223,7 +224,7 @@ export default function ProductCard({ product }) {
                                                         handleSizeSelect(size);
                                                     }}
                                                     disabled={isAddingToCart}
-                                                    className="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center text-[10px] md:text-xs font-bold rounded-full border-2 border-[#be1e2d] text-[#be1e2d] hover:bg-[#be1e2d] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    className="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 md:flex-shrink-0 flex items-center justify-center text-[10px] md:text-xs font-bold rounded-full border-2 border-[#be1e2d] text-[#be1e2d] hover:bg-[#be1e2d] hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed md:mr-1 md:mb-1"
                                                 >
                                                     {size}
                                                 </button>

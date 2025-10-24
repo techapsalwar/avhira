@@ -182,15 +182,24 @@ export default function MainLayout({ children }) {
                     compact ? 'top-4 py-2' : 'top-8 py-3'
                 }`}
             >
-                <div className="flex items-center justify-between w-full max-w-6xl mx-auto px-6">
+                <div className="flex items-center justify-between w-full max-w-6xl mx-auto px-4">
                     {/* Logo */}
                     <div className="flex items-center">
-                        <Link href="/" className="flex items-center gap-2">
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xl"
-                                 style={{ backgroundColor: '#be1e2d' }}>
-                                A
+                        <Link href="/" className="flex items-center">
+                            <div className="w-14 h-10 rounded-full flex items-center justify-center bg-white">
+                                <img
+                                    src="/apple-touch-icon.png"
+                                    alt="AVHIRA Logo"
+                                    className="w-14 h-14 object-contain"
+                                    style={{ borderRadius: '50%' }}
+                                />
                             </div>
-                            <span className="text-xl font-bold text-gray-800">AVHIRA</span>
+                            <img
+                                src="/logo.svg"
+                                alt="AVHIRA"
+                                className="h-7 w-auto -ml-[20px]"
+                                style={{ minWidth: 150 }}
+                            />
                         </Link>
                     </div>
 

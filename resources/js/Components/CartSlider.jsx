@@ -206,7 +206,7 @@ export default function CartSlider({ isOpen, onClose }) {
                                             </Link>
 
                                             {/* Product Details */}
-                                            <div className="flex-1 min-w-0 pr-12">
+                                            <div className="flex-1 min-w-0 pr-16 md:pr-12">
                                                 <Link
                                                     href={`/products/${product.slug}`}
                                                     onClick={onClose}
