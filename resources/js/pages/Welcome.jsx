@@ -4,7 +4,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import ProductCard from '@/Components/ProductCard';
 import DomeGallery from '@/Components/DomeGallery';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/Components/GlobalToastProvider';
 
 export default function Welcome({ featuredForHer, featuredForHim, categories }) {
@@ -17,6 +17,8 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
     const [canScrollRightHer, setCanScrollRightHer] = useState(true);
     const [canScrollLeftHim, setCanScrollLeftHim] = useState(false);
     const [canScrollRightHim, setCanScrollRightHim] = useState(true);
+    const [canScrollLeftSubcategories, setCanScrollLeftSubcategories] = useState(false);
+    const [canScrollRightSubcategories, setCanScrollRightSubcategories] = useState(false);
 
     // Hero image carousel state
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -61,6 +63,25 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
 
         
     ];
+
+    const allSubcategories = useMemo(() => {
+        if (!categories) {
+            return [];
+        }
+
+        return categories.flatMap((category) => {
+            const subcategories = category.active_subcategories ?? [];
+
+            return subcategories.map((subcategory) => ({
+                ...subcategory,
+                mainCategory: {
+                    id: category.id,
+                    name: category.name,
+                    slug: category.slug,
+                },
+            }));
+        });
+    }, [categories]);
 
     useEffect(() => {
         const handleScroll = () => setScrollY(window.scrollY);
@@ -125,11 +146,12 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
         const initScrollStates = () => {
             handleScrollHer('scroll-container-her');
             handleScrollHim('scroll-container-him');
+            handleScrollSubcategories();
         };
         
         // Delay to ensure DOM is ready
         setTimeout(initScrollStates, 100);
-    }, [featuredForHer, featuredForHim]);
+    }, [featuredForHer, featuredForHim, allSubcategories]);
 
     const handlePrevImage = () => {
         setCurrentImageIndex((prevIndex) => 
@@ -178,6 +200,27 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
 
     const scrollHim = (direction) => {
         const container = document.getElementById('scroll-container-him');
+        if (container) {
+            const scrollAmount = container.clientWidth * 0.8;
+            container.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    const handleScrollSubcategories = () => {
+        const container = document.getElementById('scroll-container-subcategories');
+        if (container) {
+            setCanScrollLeftSubcategories(container.scrollLeft > 0);
+            setCanScrollRightSubcategories(
+                container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+            );
+        }
+    };
+
+    const scrollSubcategories = (direction) => {
+        const container = document.getElementById('scroll-container-subcategories');
         if (container) {
             const scrollAmount = container.clientWidth * 0.8;
             container.scrollBy({
@@ -445,9 +488,9 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
             )}
 
             {/* Categories Section */}
-            {categories && categories.length > 0 && (
+            {allSubcategories.length > 0 && (
                 <section className="py-12 sm:py-16 lg:py-20" style={{ backgroundColor: '#faf5f6' }}>
-                    <div className="container mx-auto px-4 lg:px-8 xl:px-16 max-w-[1600px]">
+                    <div className="container mx-auto">
                         {/* Section Header */}
                         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
                             <span className="inline-block px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4"
@@ -462,52 +505,92 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
                             </p>
                         </div>
 
-                        {/* Categories Grid - Round Shape */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
-                            {categories.map((category, index) => (
-                                <Link 
-                                    key={category.id}
-                                    href={`/categories/${category.slug}`}
-                                    className="group flex flex-col items-center animate-fade-in"
-                                    style={{ animationDelay: `${index * 0.1}s` }}
+                        {/* Subcategories Horizontal Carousel */}
+                        <div className="relative group">
+                            {canScrollLeftSubcategories && (
+                                <button
+                                    onClick={() => scrollSubcategories('left')}
+                                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all opacity-0 group-hover:opacity-100"
+                                    style={{ marginLeft: '-12px' }}
+                                    aria-label="Scroll subcategories left"
                                 >
-                                    {/* Round Image Container */}
-                                    <div className="relative w-full aspect-square rounded-full overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-110 mb-4">
-                                        {category.image ? (
-                                            <img 
-                                                src={`/storage/${category.image}`} 
-                                                alt={category.name}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                                loading="lazy"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#be1e2d] to-[#9a1824]">
-                                                <span className="text-white text-4xl md:text-6xl font-bold opacity-80">
-                                                    {category.name[0]}
-                                                </span>
-                                            </div>
-                                        )}
-                                        
-                                        {/* Circular Overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                        
-                                        
-                                    </div>
-                                    
-                                    {/* Category Name Below */}
-                                    <div className="text-center">
-                                        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-gray-900 mb-1 group-hover:text-[#be1e2d] transition-colors">
-                                            {category.name}
-                                        </h3>
-                                        <div className="hidden sm:flex items-center justify-center gap-1 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span className="text-xs sm:text-sm">Explore</span>
-                                            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                            </svg>
+                                    <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                            )}
+
+                            <div
+                                id="scroll-container-subcategories"
+                                className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+                                onScroll={handleScrollSubcategories}
+                                style={{
+                                    scrollSnapType: 'x mandatory',
+                                    WebkitOverflowScrolling: 'touch',
+                                }}
+                            >
+                                {allSubcategories.map((subcategory, index) => (
+                                    <Link
+                                        key={subcategory.id}
+                                        href={`/categories/${subcategory.mainCategory.slug}/${subcategory.slug}`}
+                                        className="group flex-shrink-0 w-[200px] sm:w-[220px] flex flex-col items-center text-center animate-fade-in"
+                                        style={{
+                                            animationDelay: `${index * 0.05}s`,
+                                            scrollSnapAlign: 'center',
+                                        }}
+                                    >
+                                        {/* Round Image Container */}
+                                        <div className="relative w-full aspect-square rounded-full overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-110 mb-4">
+                                            {subcategory.image ? (
+                                                <img
+                                                    src={`/storage/${subcategory.image}`}
+                                                    alt={subcategory.name}
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    loading="lazy"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#be1e2d] to-[#9a1824]">
+                                                    <span className="text-white text-4xl md:text-6xl font-bold opacity-80">
+                                                        {subcategory.name?.charAt(0) ?? '?'}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Circular Overlay */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                         </div>
-                                    </div>
-                                </Link>
-                            ))}
+
+                                        {/* Subcategory Name Below */}
+                                        <div className="text-center">
+                                            <h3 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-1 group-hover:text-[#be1e2d] transition-colors">
+                                                {subcategory.name}
+                                            </h3>
+                                            <p className="text-xs sm:text-sm text-gray-500 mb-2">
+                                                {subcategory.mainCategory.name}
+                                            </p>
+                                            <div className="hidden sm:flex items-center justify-center gap-1 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <span className="text-xs sm:text-sm">Explore</span>
+                                                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+
+                            {canScrollRightSubcategories && (
+                                <button
+                                    onClick={() => scrollSubcategories('right')}
+                                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all opacity-0 group-hover:opacity-100"
+                                    style={{ marginRight: '-12px' }}
+                                    aria-label="Scroll subcategories right"
+                                >
+                                    <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
                     </div>
                 </section>

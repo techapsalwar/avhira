@@ -40,14 +40,7 @@ export default function ShowMain({ mainCategory, products, totalProducts }) {
                                 Home
                             </Link>
                         </li>
-                        <li className="flex items-center">
-                            <svg className="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                            <Link href="/categories" className="hover:text-avhira-red transition-colors">
-                                Categories
-                            </Link>
-                        </li>
+                        
                         <li className="flex items-center">
                             <svg className="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -58,30 +51,28 @@ export default function ShowMain({ mainCategory, products, totalProducts }) {
                 </nav>
 
                 {/* Header with Inline Filters */}
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 sm:mb-8">
                     {/* Title and Description */}
                     <div>
                         <h1 className="text-4xl font-bold text-gray-900">{mainCategory.name}</h1>
                         {mainCategory.description && (
                             <p className="text-gray-600 mt-2 max-w-2xl">{mainCategory.description}</p>
                         )}
-                        <p className="text-gray-600 mt-1">
-                            {sortedProducts.length} product{sortedProducts.length !== 1 ? 's' : ''}
-                        </p>
+                        
                     </div>
 
                     {/* Inline Filters */}
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         {/* Subcategory Filter */}
                         {mainCategory.subcategories && mainCategory.subcategories.length > 0 && (
                             <select 
                                 value={selectedSubcategory}
                                 onChange={(e) => setSelectedSubcategory(e.target.value)}
-                                className="px-4 py-2.5 text-sm font-medium border-2 border-gray-200 rounded-full bg-white hover:border-gray-300 focus:outline-none focus:border-[#be1e2d] transition-all cursor-pointer appearance-none pr-10 bg-no-repeat bg-right"
+                                className="h-9 px-4 text-sm font-medium border border-gray-200 rounded-full bg-white shadow-sm hover:border-gray-300 focus:outline-none focus:border-[#be1e2d] transition-all cursor-pointer appearance-none pr-8 bg-no-repeat bg-right"
                                 style={{
-                                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23be1e2d'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-                                    backgroundSize: '1.25rem',
-                                    backgroundPosition: 'right 0.75rem center'
+                                    backgroundImage: `linear-gradient(90deg, transparent 0, transparent calc(100% - 2.5rem), rgba(190, 30, 45, 0.06) calc(100% - 2.5rem)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' stroke='%23be1e2d' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
+                                    backgroundSize: '100% 100%, 1.125rem',
+                                    backgroundPosition: 'center, right 0.6rem center'
                                 }}
                             >
                                 <option value="all">All Subcategories</option>
@@ -94,17 +85,17 @@ export default function ShowMain({ mainCategory, products, totalProducts }) {
                         )}
 
                         {/* Divider */}
-                        <div className="hidden sm:block w-px h-8 bg-gray-300" />
+                        <div className="hidden sm:block w-px h-8 bg-gray-200" />
 
                         {/* Sort By */}
                         <select 
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
-                            className="px-4 py-2.5 text-sm font-medium border-2 border-gray-200 rounded-full bg-white hover:border-gray-300 focus:outline-none focus:border-[#be1e2d] transition-all cursor-pointer appearance-none pr-10 bg-no-repeat bg-right"
+                            className="h-9 px-4 text-sm font-medium border border-gray-200 rounded-full bg-white shadow-sm hover:border-gray-300 focus:outline-none focus:border-[#be1e2d] transition-all cursor-pointer appearance-none pr-8 bg-no-repeat bg-right"
                             style={{
-                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23be1e2d'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-                                backgroundSize: '1.25rem',
-                                backgroundPosition: 'right 0.75rem center'
+                                backgroundImage: `linear-gradient(90deg, transparent 0, transparent calc(100% - 2.5rem), rgba(190, 30, 45, 0.06) calc(100% - 2.5rem)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' viewBox='0 0 24 24' stroke='%23be1e2d' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
+                                backgroundSize: '100% 100%, 1.125rem',
+                                backgroundPosition: 'center, right 0.6rem center'
                             }}
                         >
                             <option value="newest">Newest First</option>
@@ -120,7 +111,7 @@ export default function ShowMain({ mainCategory, products, totalProducts }) {
                                     setSelectedSubcategory('all');
                                     setSortBy('newest');
                                 }}
-                                className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-[#be1e2d] transition-colors flex items-center gap-1"
+                                className="h-9 px-3 inline-flex items-center gap-1 rounded-full text-sm font-medium text-gray-500 border border-gray-200 hover:text-[#be1e2d] hover:border-[#be1e2d] transition-colors"
                                 title="Reset filters"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,7 +127,7 @@ export default function ShowMain({ mainCategory, products, totalProducts }) {
 
                 {/* Products Grid */}
                 {sortedProducts.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
                         {sortedProducts.map(product => (
                             <ProductCard key={product.id} product={product} />
                         ))}

@@ -13,12 +13,12 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $mainCategories = MainCategory::with(['subcategories' => function($query) {
+        $mainCategories = MainCategory::with(['subcategories' => function ($query) {
             $query->withCount('products')->active()->ordered();
         }])
-        ->active()
-        ->ordered()
-        ->get();
+            ->active()
+            ->ordered()
+            ->get();
 
         return Inertia::render('Categories/Index', [
             'categories' => $mainCategories,
@@ -30,7 +30,7 @@ class CategoryController extends Controller
      */
     public function showMain(MainCategory $mainCategory)
     {
-        $mainCategory->load(['subcategories' => function($query) {
+        $mainCategory->load(['subcategories' => function ($query) {
             $query->withCount('products')->active()->ordered();
         }]);
 
@@ -47,8 +47,12 @@ class CategoryController extends Controller
     /**
      * Display the specified subcategory with its products.
      */
-    public function showSubcategory(Subcategory $subcategory)
+    public function showSubcategory(MainCategory $mainCategory, Subcategory $subcategory)
     {
+        if ($subcategory->main_category_id !== $mainCategory->id) {
+            abort(404);
+        }
+
         $subcategory->load(['products', 'mainCategory']);
 
         return Inertia::render('Categories/Show', [

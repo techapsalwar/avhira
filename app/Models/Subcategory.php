@@ -40,6 +40,11 @@ class Subcategory extends Model
         });
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     /**
      * Get the main category this subcategory belongs to
      */
@@ -93,6 +98,6 @@ class Subcategory extends Model
      */
     public function getFullPath(): string
     {
-        return $this->mainCategory->name . ' → ' . $this->name;
+        return $this->mainCategory->name.' → '.$this->name;
     }
 }

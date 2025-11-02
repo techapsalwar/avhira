@@ -1,17 +1,54 @@
 // File: resources/js/Pages/Products/Index.jsx
 
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import ProductCard from '@/Components/ProductCard';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export default function Index({ products, categories }) {
-    const [selectedCategory, setSelectedCategory] = useState('all');
+    const [activeCategoryId, setActiveCategoryId] = useState(null);
+    const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('all');
     const [sortBy, setSortBy] = useState('newest');
 
-    const filteredProducts = products.filter(product => {
-        if (selectedCategory === 'all') return true;
-        return product.category_id === parseInt(selectedCategory);
+    const menCategory = useMemo(() => (
+        categories?.find((category) =>
+            category?.slug?.toLowerCase() === 'men' || category?.name?.toLowerCase() === 'men'
+        ) ?? null
+    ), [categories]);
+
+    const womenCategory = useMemo(() => (
+        categories?.find((category) =>
+            category?.slug?.toLowerCase() === 'women' || category?.name?.toLowerCase() === 'women'
+        ) ?? null
+    ), [categories]);
+
+    const activeCategory = useMemo(() => {
+        if (!activeCategoryId) {
+            return null;
+        }
+
+        return categories?.find((category) => category?.id === activeCategoryId) ?? null;
+    }, [categories, activeCategoryId]);
+
+    const numericSubcategoryId = selectedSubcategoryId === 'all' ? null : Number(selectedSubcategoryId);
+
+    const filteredProducts = products.filter((product) => {
+        const mainCategoryId = product.subcategory?.main_category?.id
+            ?? product.subcategory?.main_category_id
+            ?? null;
+        const normalizedMainCategoryId = mainCategoryId !== null ? Number(mainCategoryId) : null;
+        const subcategoryId = product.subcategory?.id ?? product.subcategory_id ?? null;
+        const normalizedSubcategoryId = subcategoryId !== null ? Number(subcategoryId) : null;
+
+        if (activeCategory && normalizedMainCategoryId !== Number(activeCategory.id)) {
+            return false;
+        }
+
+        if (numericSubcategoryId && normalizedSubcategoryId !== numericSubcategoryId) {
+            return false;
+        }
+
+        return true;
     });
 
     const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -27,6 +64,8 @@ export default function Index({ products, categories }) {
         }
     });
 
+    const availableSubcategories = activeCategory?.active_subcategories ?? [];
+
     return (
         <MainLayout>
             <Head title="All Products - Avhira" />
@@ -37,34 +76,84 @@ export default function Index({ products, categories }) {
                     {/* Title and Count */}
                     <div>
                         <h1 className="text-4xl font-bold text-gray-900">All Products</h1>
-                        <p className="text-gray-600 mt-1">
-                            {sortedProducts.length} product{sortedProducts.length !== 1 ? 's' : ''}
-                        </p>
+                        
                     </div>
 
                     {/* Inline Filters */}
                     <div className="flex flex-wrap items-center gap-3">
-                        {/* Category Filter */}
-                        <select 
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="px-4 py-2.5 text-sm font-medium border-2 border-gray-200 rounded-full bg-white hover:border-gray-300 focus:outline-none focus:border-[#be1e2d] transition-all cursor-pointer appearance-none pr-10 bg-no-repeat bg-right"
-                            style={{
-                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23be1e2d'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-                                backgroundSize: '1.25rem',
-                                backgroundPosition: 'right 0.75rem center'
-                            }}
-                        >
-                            <option value="all">All Categories</option>
-                            {categories && categories.map(category => (
-                                <option key={category.id} value={category.id}>
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
+                        {/* Category Toggles */}
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (!menCategory) return;
+                                    setActiveCategoryId((current) => {
+                                        const next = current === menCategory.id ? null : menCategory.id;
+                                        if (next === null) {
+                                            setSelectedSubcategoryId('all');
+                                        } else if (next !== current) {
+                                            setSelectedSubcategoryId('all');
+                                        }
+                                        return next;
+                                    });
+                                }}
+                                className={`px-4 py-2.5 text-sm font-semibold rounded-full border transition-all ${
+                                    activeCategoryId === menCategory?.id
+                                        ? 'bg-[#be1e2d] text-white border-[#be1e2d]'
+                                        : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300 hover:text-[#be1e2d]'
+                                } ${menCategory ? '' : 'opacity-50 cursor-not-allowed'}`}
+                                disabled={!menCategory}
+                            >
+                                Men
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (!womenCategory) return;
+                                    setActiveCategoryId((current) => {
+                                        const next = current === womenCategory.id ? null : womenCategory.id;
+                                        if (next === null) {
+                                            setSelectedSubcategoryId('all');
+                                        } else if (next !== current) {
+                                            setSelectedSubcategoryId('all');
+                                        }
+                                        return next;
+                                    });
+                                }}
+                                className={`px-4 py-2.5 text-sm font-semibold rounded-full border transition-all ${
+                                    activeCategoryId === womenCategory?.id
+                                        ? 'bg-[#be1e2d] text-white border-[#be1e2d]'
+                                        : 'bg-white text-gray-800 border-gray-200 hover:border-gray-300 hover:text-[#be1e2d]'
+                                } ${womenCategory ? '' : 'opacity-50 cursor-not-allowed'}`}
+                                disabled={!womenCategory}
+                            >
+                                Women
+                            </button>
+                        </div>
 
                         {/* Divider */}
                         <div className="hidden sm:block w-px h-8 bg-gray-300" />
+
+                        {/* Subcategory Dropdown */}
+                        {activeCategory && availableSubcategories.length > 0 && (
+                            <select
+                                value={selectedSubcategoryId}
+                                onChange={(e) => setSelectedSubcategoryId(e.target.value)}
+                                className="px-4 py-2.5 text-sm font-medium border-2 border-gray-200 rounded-full bg-white hover:border-gray-300 focus:outline-none focus:border-[#be1e2d] transition-all cursor-pointer appearance-none pr-10 bg-no-repeat bg-right"
+                                style={{
+                                    backgroundImage: `url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23be1e2d'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")`,
+                                    backgroundSize: '1.25rem',
+                                    backgroundPosition: 'right 0.75rem center'
+                                }}
+                            >
+                                <option value="all">All {activeCategory.name}</option>
+                                {availableSubcategories.map((subcategory) => (
+                                    <option key={subcategory.id} value={subcategory.id}>
+                                        {subcategory.name}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
 
                         {/* Sort By */}
                         <select 
@@ -84,10 +173,11 @@ export default function Index({ products, categories }) {
                         </select>
 
                         {/* Reset Filters Button (only shows when filters are active) */}
-                        {(selectedCategory !== 'all' || sortBy !== 'newest') && (
+                        {(activeCategory || selectedSubcategoryId !== 'all' || sortBy !== 'newest') && (
                             <button
                                 onClick={() => {
-                                    setSelectedCategory('all');
+                                    setActiveCategoryId(null);
+                                    setSelectedSubcategoryId('all');
                                     setSortBy('newest');
                                 }}
                                 className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-[#be1e2d] transition-colors flex items-center gap-1"
@@ -104,7 +194,7 @@ export default function Index({ products, categories }) {
 
                 {/* Products Grid */}
                 {sortedProducts.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8">
                         {sortedProducts.map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))}
@@ -118,7 +208,8 @@ export default function Index({ products, categories }) {
                         <p className="text-gray-600 mb-4">Try adjusting your filters</p>
                         <button 
                             onClick={() => {
-                                setSelectedCategory('all');
+                                setActiveCategoryId(null);
+                                setSelectedSubcategoryId('all');
                                 setSortBy('newest');
                             }}
                             className="bg-avhira-red text-white px-6 py-2 rounded-lg hover:bg-avhira-dark-red transition-colors"

@@ -250,15 +250,16 @@ export default function Show({ product }) {
                         </div>
 
                         {/* Stock Info */}
-                        <div className="text-sm">
-                            {product.stock_quantity > 0 ? (
-                                <p className="text-green-600 font-medium">
-                                    ✓ In Stock ({product.stock_quantity} available)
-                                </p>
-                            ) : (
+                        {product.stock_quantity > 0 && product.stock_quantity <= 10 && (
+                            <div className="text-sm">
+                                <p className="text-orange-600 font-medium">Hurry up! Few left</p>
+                            </div>
+                        )}
+                        {product.stock_quantity === 0 && (
+                            <div className="text-sm">
                                 <p className="text-red-600 font-medium">✗ Out of Stock</p>
-                            )}
-                        </div>
+                            </div>
+                        )}
 
                         {/* Add to Cart Button */}
                         <button

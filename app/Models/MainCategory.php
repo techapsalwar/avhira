@@ -37,6 +37,11 @@ class MainCategory extends Model
         });
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     /**
      * Get all subcategories for this main category
      */
