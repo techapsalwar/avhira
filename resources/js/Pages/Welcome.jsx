@@ -510,7 +510,7 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
                             {canScrollLeftSubcategories && (
                                 <button
                                     onClick={() => scrollSubcategories('left')}
-                                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all opacity-0 group-hover:opacity-100"
+                                    className="absolute left-0 top-2/5 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all opacity-0 group-hover:opacity-100"
                                     style={{ marginLeft: '-12px' }}
                                     aria-label="Scroll subcategories left"
                                 >
@@ -522,7 +522,7 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
 
                             <div
                                 id="scroll-container-subcategories"
-                                className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+                                className="flex gap-2 sm:gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-3 sm:pb-4"
                                 onScroll={handleScrollSubcategories}
                                 style={{
                                     scrollSnapType: 'x mandatory',
@@ -533,14 +533,14 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
                                     <Link
                                         key={subcategory.id}
                                         href={`/categories/${subcategory.mainCategory.slug}/${subcategory.slug}`}
-                                        className="group flex-shrink-0 w-[200px] sm:w-[220px] flex flex-col items-center text-center animate-fade-in"
+                                        className="group flex-shrink-0 w-[88px] sm:w-[200px] flex flex-col items-center text-center animate-fade-in"
                                         style={{
                                             animationDelay: `${index * 0.05}s`,
                                             scrollSnapAlign: 'center',
                                         }}
                                     >
                                         {/* Round Image Container */}
-                                        <div className="relative w-full aspect-square rounded-full overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-110 mb-4">
+                                        <div className="relative w-full aspect-square rounded-full overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-110 mb-3 sm:mb-4">
                                             {subcategory.image ? (
                                                 <img
                                                     src={`/storage/${subcategory.image}`}
@@ -550,7 +550,7 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#be1e2d] to-[#9a1824]">
-                                                    <span className="text-white text-4xl md:text-6xl font-bold opacity-80">
+                                                    <span className="text-white text-2xl sm:text-4xl md:text-6xl font-bold opacity-80">
                                                         {subcategory.name?.charAt(0) ?? '?'}
                                                     </span>
                                                 </div>
@@ -562,10 +562,10 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
 
                                         {/* Subcategory Name Below */}
                                         <div className="text-center">
-                                            <h3 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-1 group-hover:text-[#be1e2d] transition-colors">
+                                            <h3 className="text-xs sm:text-base md:text-lg font-bold text-gray-900 mb-1 group-hover:text-[#be1e2d] transition-colors">
                                                 {subcategory.name}
                                             </h3>
-                                            <p className="text-xs sm:text-sm text-gray-500 mb-2">
+                                            <p className="text-[10px] sm:text-sm text-gray-500 mb-1 sm:mb-2">
                                                 {subcategory.mainCategory.name}
                                             </p>
                                             <div className="hidden sm:flex items-center justify-center gap-1 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -582,7 +582,7 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
                             {canScrollRightSubcategories && (
                                 <button
                                     onClick={() => scrollSubcategories('right')}
-                                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all opacity-0 group-hover:opacity-100"
+                                    className="absolute right-0 top-2/5 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all opacity-0 group-hover:opacity-100"
                                     style={{ marginRight: '-12px' }}
                                     aria-label="Scroll subcategories right"
                                 >
@@ -596,83 +596,190 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
                 </section>
             )}
 
-            {/* Why Choose Us Section */}
-            <section className="container mx-auto px-4 lg:px-8 xl:px-16 py-12 sm:py-16 lg:py-20 max-w-[1600px]">
-                <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-                    <span className="inline-block px-4 py-2 rounded-full text-xs sm:text-sm font-semibold mb-4"
-                          style={{ backgroundColor: 'rgba(190, 30, 45, 0.1)', color: '#be1e2d' }}>
-                        Why Choose AVHIRA
-                    </span>
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 px-4">
-                        Experience Excellence
-                    </h2>
-                    <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-                        We're committed to providing you with the best shopping experience
-                    </p>
-                </div>
+            {/* Why Choose Avhira - Jaipur Heritage Section */}
+            <section className="relative py-16 sm:py-20 lg:py-28 overflow-hidden">
+                
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {[
-                        {
-                            icon: "M5 13l4 4L19 7",
-                            title: "Premium Quality",
-                            description: "Only the finest fabrics and materials for lasting comfort and style",
-                            delay: "0s"
-                        },
-                        {
-                            icon: "M13 10V3L4 14h7v7l9-11h-7z",
-                            title: "Fast Shipping",
-                            description: "Quick and reliable delivery to your doorstep within 3-5 days",
-                            delay: "0.1s"
-                        },
-                        {
-                            icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
-                            title: "Easy Returns",
-                            description: "Hassle-free returns within 30 days of purchase, no questions asked",
-                            delay: "0.2s"
-                        }
-                    ].map((feature, index) => (
-                        <div 
-                            key={index}
-                            className="group relative p-5 sm:p-6 lg:p-8 rounded-2xl bg-white shadow-md hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fade-in"
-                            style={{ animationDelay: feature.delay }}
-                        >
-                            {/* Icon */}
-                            <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6"
-                                 style={{ backgroundColor: '#be1e2d' }}>
-                                <svg className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={feature.icon} />
-                                </svg>
+                <div className="container mx-auto px-4 lg:px-8 xl:px-16 relative z-10 max-w-[1600px]">
+                    {/* Header */}
+                    <div className="text-center mb-12 sm:mb-16 lg:mb-20">
+                        <span className="inline-block px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold mb-5 shadow-lg"
+                              style={{ 
+                                  background: 'linear-gradient(135deg, #be1e2d 0%, #9a1824 100%)',
+                                  color: 'white'
+                              }}>
+                            ✨ Why Choose Avhira?
+                        </span>
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 px-4 leading-tight">
+                            The Soul of Jaipur's
+                            <br />
+                            <span style={{ color: '#be1e2d' }}>Timeless Prints</span>
+                        </h2>
+                        <p className="text-base sm:text-lg md:text-xl text-gray-700 max-w-3xl mx-auto px-4 leading-relaxed">
+                            At Avhira, we bring you the essence of Jaipur's heritage with a modern touch. From premium cotton fabrics to handcrafted detailing — everything we create is rooted in <strong className="text-[#be1e2d]">authenticity, comfort, and style</strong>.
+                        </p>
+                    </div>
+
+                    {/* Features Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-12 sm:mb-16">
+                        {[
+                            {
+                                icon: (
+                                    <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                ),
+                                title: "Premium Cotton Quality",
+                                description: "High-grade cotton that's soft, breathable, and durable — perfect for all-day comfort in every season",
+                                gradient: "from-emerald-400 to-emerald-600",
+                                delay: "0s"
+                            },
+                            {
+                                icon: (
+                                    <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 008 10.172V5L7 4z" />
+                                    </svg>
+                                ),
+                                title: "In-House Manufacturing",
+                                description: "Our own production setup lets us design and craft exclusive patterns you won't find anywhere else",
+                                gradient: "from-blue-400 to-blue-600",
+                                delay: "0.1s"
+                            },
+                            {
+                                icon: (
+                                    <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                    </svg>
+                                ),
+                                title: "Crafted by Jaipur's Artisans",
+                                description: "Our prints come alive through skilled artisans carrying forward the legacy of Jaipuri and Sanganeri art",
+                                gradient: "from-purple-400 to-purple-600",
+                                delay: "0.2s"
+                            },
+                            {
+                                icon: (
+                                    <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                    </svg>
+                                ),
+                                title: "Trend Meets Tradition",
+                                description: "Blending traditional prints with modern silhouettes — from shirts to kurtis, tops, and dresses for today's lifestyle",
+                                gradient: "from-rose-400 to-rose-600",
+                                delay: "0.3s"
+                            }
+                        ].map((feature, index) => (
+                            <div 
+                                key={index}
+                                className="group relative animate-fade-in"
+                                style={{ animationDelay: feature.delay }}
+                            >
+                                {/* Card */}
+                                <div className="relative h-full p-6 sm:p-8 rounded-3xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 border border-gray-100">
+                                    {/* Gradient Icon Background */}
+                                    <div className={`w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mx-auto mb-6 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 shadow-lg`}>
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 text-white">
+                                            {feature.icon}
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 text-center leading-tight">
+                                        {feature.title}
+                                    </h3>
+                                    <p className="text-sm sm:text-base text-gray-600 text-center leading-relaxed">
+                                        {feature.description}
+                                    </p>
+
+                                    {/* Hover Accent */}
+                                    <div className={`absolute inset-x-0 bottom-0 h-1.5 rounded-b-3xl bg-gradient-to-r ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                                </div>
                             </div>
+                        ))}
+                    </div>
 
-                            {/* Content */}
-                            <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-2 sm:mb-3 text-center">
-                                {feature.title}
+                    {/* Heritage Banner */}
+                    <div className="relative rounded-3xl overflow-hidden shadow-2xl animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#be1e2d] via-[#d4243a] to-[#be1e2d]" />
+                        <div className="absolute inset-0 opacity-10">
+                            <div className="absolute inset-0" style={{
+                                backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
+                            }} />
+                        </div>
+                        
+                        <div className="relative z-10 py-12 sm:py-16 px-6 sm:px-12 text-center">
+                            <div className="flex items-center justify-center gap-3 mb-4">
+                                <div className="w-12 h-1 bg-white/40 rounded-full" />
+                                <svg className="w-6 h-6 text-white/80" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                                </svg>
+                                <div className="w-12 h-1 bg-white/40 rounded-full" />
+                            </div>
+                            
+                            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
+                                Handcrafted with Heritage, Styled for Today
                             </h3>
-                            <p className="text-sm sm:text-base text-gray-600 text-center leading-relaxed">
-                                {feature.description}
+                            <p className="text-base sm:text-lg text-white/90 max-w-2xl mx-auto mb-6">
+                                Every piece tells the story of Jaipur's rich artistic tradition, reimagined for the modern wardrobe
                             </p>
-
-                            {/* Decorative Element */}
-                            <div className="absolute top-0 left-0 w-full h-1 rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity"
-                                 style={{ backgroundColor: '#be1e2d' }} />
+                            
+                            <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12 mt-8">
+                                <div className="text-center">
+                                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1">100%</div>
+                                    <div className="text-sm sm:text-base text-white/80">Authentic Prints</div>
+                                </div>
+                                <div className="hidden sm:block w-px h-12 bg-white/20" />
+                                <div className="text-center">
+                                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1">Premium</div>
+                                    <div className="text-sm sm:text-base text-white/80">Cotton Quality</div>
+                                </div>
+                                <div className="hidden sm:block w-px h-12 bg-white/20" />
+                                <div className="text-center">
+                                    <div className="text-3xl sm:text-4xl font-bold text-white mb-1">Exclusive</div>
+                                    <div className="text-sm sm:text-base text-white/80">Designs</div>
+                                </div>
+                            </div>
                         </div>
-                    ))}
-                </div>
+                    </div>
 
-                {/* Additional Trust Elements */}
-                <div className="mt-12 sm:mt-16 lg:mt-20 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 max-w-4xl mx-auto">
-                    {[
-                        { label: "Free Shipping", sublabel: "On orders over ₹999" },
-                        { label: "Secure Payment", sublabel: "100% Protected" },
-                        { label: "24/7 Support", sublabel: "Always here to help" },
-                        { label: "Satisfaction", sublabel: "Guaranteed quality" }
-                    ].map((item, index) => (
-                        <div key={index} className="text-center animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
-                            <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 mb-1">{item.label}</div>
-                            <div className="text-xs sm:text-sm text-gray-500">{item.sublabel}</div>
-                        </div>
-                    ))}
+                    {/* Trust Badges */}
+                    <div className="mt-12 sm:mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                        {[
+                            { 
+                                icon: "M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4",
+                                label: "Free Shipping", 
+                                sublabel: "On orders over ₹999" 
+                            },
+                            { 
+                                icon: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z",
+                                label: "Secure Payment", 
+                                sublabel: "100% Protected" 
+                            },
+                            { 
+                                icon: "M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z",
+                                label: "24/7 Support", 
+                                sublabel: "Always here to help" 
+                            },
+                            { 
+                                icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+                                label: "Quality Assured", 
+                                sublabel: "Guaranteed satisfaction" 
+                            }
+                        ].map((item, index) => (
+                            <div 
+                                key={index} 
+                                className="group text-center p-6 rounded-2xl bg-white/60 backdrop-blur-sm hover:bg-white transition-all duration-300 hover:shadow-lg animate-fade-in" 
+                                style={{ animationDelay: `${0.5 + index * 0.1}s` }}
+                            >
+                                <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-[#be1e2d] to-[#9a1824] flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
+                                    </svg>
+                                </div>
+                                <div className="text-base sm:text-lg font-bold text-gray-900 mb-1">{item.label}</div>
+                                <div className="text-xs sm:text-sm text-gray-600">{item.sublabel}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
 

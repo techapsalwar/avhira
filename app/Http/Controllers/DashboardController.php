@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -22,10 +22,17 @@ class DashboardController extends Controller
             ->where('status', 'delivered')
             ->orderByDesc('created_at')
             ->get();
+        // Cancelled orders
+        $cancelledOrders = Order::where('user_id', $user->id)
+            ->where('status', 'cancelled')
+            ->orderByDesc('updated_at')
+            ->get();
+
         return Inertia::render('Dashboard', [
             'user' => $user,
             'activeOrder' => $activeOrder,
             'deliveredOrders' => $deliveredOrders,
+            'cancelledOrders' => $cancelledOrders,
         ]);
     }
 }
