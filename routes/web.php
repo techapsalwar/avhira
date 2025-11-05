@@ -1,13 +1,12 @@
 <?php
 
-use App\Http\Controllers\WelcomeController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
-
+use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -16,6 +15,11 @@ Route::get('/maintenance', [MaintenanceController::class, 'show'])->name('mainte
 
 // Public Routes
 Route::get('/', [WelcomeController::class, 'index'])->name('home');
+
+// About Page
+Route::get('/about', function () {
+    return Inertia::render('About');
+})->name('about');
 
 // Products
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
