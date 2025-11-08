@@ -1,18 +1,44 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { useState } from 'react';
 
 export default function EditSubcategory({ subcategory, mainCategories }) {
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         name: subcategory.name || '',
         main_category_id: subcategory.main_category_id || '',
         description: subcategory.description || '',
         display_order: subcategory.display_order || 0,
         is_active: subcategory.is_active ?? true,
+        image: null,
+        existing_image: subcategory.image || null,
+        _method: 'PUT',
     });
+
+    const [imagePreview, setImagePreview] = useState(null);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setData('image', file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
+    const removeExistingImage = () => {
+        setData('existing_image', null);
+    };
+
+    const removeNewImage = () => {
+        setData('image', null);
+        setImagePreview(null);
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(`/admin/categories/${subcategory.id}`);
+        post(`/admin/categories/${subcategory.id}`, {
+            forceFormData: true,
+            preserveScroll: true,
+        });
     };
 
     return (
@@ -90,6 +116,79 @@ export default function EditSubcategory({ subcategory, mainCategories }) {
                             />
                             {errors.description && (
                                 <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+                            )}
+                        </div>
+
+                        {/* Subcategory Image */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Subcategory Image
+                            </label>
+                            
+                            {/* Current Image */}
+                            {data.existing_image && !imagePreview && (
+                                <div className="mb-4">
+                                    <label className="block text-xs font-medium text-gray-500 mb-2">
+                                        Current Image
+                                    </label>
+                                    <div className="relative inline-block">
+                                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200 shadow-lg">
+                                            <img
+                                                src={`/storage/${data.existing_image}`}
+                                                alt={subcategory.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={removeExistingImage}
+                                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700 shadow-md"
+                                            title="Remove image"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* New Image Upload */}
+                            <input
+                                type="file"
+                                id="image"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
+                            />
+                            <p className="mt-1 text-xs text-gray-500">Upload an image that will be displayed in a circular container on the website</p>
+                            
+                            {/* New Image Preview */}
+                            {imagePreview && (
+                                <div className="mt-4">
+                                    <label className="block text-xs font-medium text-gray-500 mb-2">
+                                        New Image Preview
+                                    </label>
+                                    <div className="relative inline-block">
+                                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-green-200 shadow-lg">
+                                            <img
+                                                src={imagePreview}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={removeNewImage}
+                                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700 shadow-md"
+                                            title="Remove new image"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {errors.image && (
+                                <p className="mt-1 text-sm text-red-600">{errors.image}</p>
                             )}
                         </div>
 

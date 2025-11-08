@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MainCategory;
 use App\Models\Subcategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -17,8 +18,8 @@ class AdminCategoryController extends Controller
         $query = MainCategory::withCount('subcategories');
 
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%')
+                ->orWhere('description', 'like', '%'.$request->search.'%');
         }
 
         $mainCategories = $query->ordered()->paginate(15)->withQueryString();
@@ -62,13 +63,13 @@ class AdminCategoryController extends Controller
     public function updateMain(Request $request, MainCategory $mainCategory)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:main_categories,name,' . $mainCategory->id,
+            'name' => 'required|string|max:255|unique:main_categories,name,'.$mainCategory->id,
             'description' => 'nullable|string',
             'display_order' => 'nullable|integer|min:0',
         ]);
 
         $data = $request->all();
-        
+
         if ($request->name !== $mainCategory->name) {
             $data['slug'] = Str::slug($request->name);
         }
@@ -99,8 +100,8 @@ class AdminCategoryController extends Controller
         $query = Subcategory::with('mainCategory')->withCount('products');
 
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%')
+                ->orWhere('description', 'like', '%'.$request->search.'%');
         }
 
         if ($request->filled('main_category')) {
@@ -133,9 +134,10 @@ class AdminCategoryController extends Controller
             'main_category_id' => 'required|exists:main_categories,id',
             'description' => 'nullable|string',
             'display_order' => 'nullable|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $data = $request->all();
+        $data = $request->except(['image']);
         $data['slug'] = Str::slug($request->name);
         $data['is_active'] = $request->get('is_active', true);
 
@@ -146,6 +148,11 @@ class AdminCategoryController extends Controller
 
         if ($exists) {
             return back()->withErrors(['name' => 'This subcategory name already exists in the selected main category.']);
+        }
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('subcategories', 'public');
         }
 
         Subcategory::create($data);
@@ -172,10 +179,11 @@ class AdminCategoryController extends Controller
             'main_category_id' => 'required|exists:main_categories,id',
             'description' => 'nullable|string',
             'display_order' => 'nullable|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $data = $request->all();
-        
+        $data = $request->except(['image', 'existing_image']);
+
         // Validate unique name within main category (excluding current)
         $exists = Subcategory::where('main_category_id', $request->main_category_id)
             ->where('name', $request->name)
@@ -185,9 +193,28 @@ class AdminCategoryController extends Controller
         if ($exists) {
             return back()->withErrors(['name' => 'This subcategory name already exists in the selected main category.']);
         }
-        
+
         if ($request->name !== $subcategory->name) {
             $data['slug'] = Str::slug($request->name);
+        }
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($subcategory->image) {
+                Storage::disk('public')->delete($subcategory->image);
+            }
+
+            // Store new image
+            $data['image'] = $request->file('image')->store('subcategories', 'public');
+        }
+
+        // Handle image removal
+        if ($request->has('existing_image') && $request->existing_image === null && ! $request->hasFile('image')) {
+            if ($subcategory->image) {
+                Storage::disk('public')->delete($subcategory->image);
+            }
+            $data['image'] = null;
         }
 
         $subcategory->update($data);

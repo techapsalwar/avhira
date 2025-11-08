@@ -1,5 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { useState } from 'react';
 
 export default function CreateSubcategory({ mainCategories }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -8,11 +9,30 @@ export default function CreateSubcategory({ mainCategories }) {
         description: '',
         display_order: 0,
         is_active: true,
+        image: null,
     });
+
+    const [imagePreview, setImagePreview] = useState(null);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setData('image', file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
+    const removeImage = () => {
+        setData('image', null);
+        setImagePreview(null);
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post('/admin/categories');
+        post('/admin/categories', {
+            forceFormData: true,
+            preserveScroll: true,
+        });
     };
 
     return (
@@ -90,6 +110,52 @@ export default function CreateSubcategory({ mainCategories }) {
                             />
                             {errors.description && (
                                 <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+                            )}
+                        </div>
+
+                        {/* Subcategory Image */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Subcategory Image
+                            </label>
+                            
+                            <input
+                                type="file"
+                                id="image"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
+                            />
+                            <p className="mt-1 text-xs text-gray-500">Upload an image that will be displayed in a circular container on the website</p>
+                            
+                            {/* Image Preview */}
+                            {imagePreview && (
+                                <div className="mt-4">
+                                    <label className="block text-xs font-medium text-gray-500 mb-2">
+                                        Image Preview
+                                    </label>
+                                    <div className="relative inline-block">
+                                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-green-200 shadow-lg">
+                                            <img
+                                                src={imagePreview}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={removeImage}
+                                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700 shadow-md"
+                                            title="Remove image"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {errors.image && (
+                                <p className="mt-1 text-sm text-red-600">{errors.image}</p>
                             )}
                         </div>
 

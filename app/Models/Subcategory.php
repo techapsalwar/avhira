@@ -40,11 +40,6 @@ class Subcategory extends Model
         });
     }
 
-    public function getRouteKeyName(): string
-    {
-        return 'slug';
-    }
-
     /**
      * Get the main category this subcategory belongs to
      */
