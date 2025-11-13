@@ -5,6 +5,14 @@ import { useMemo, useState } from 'react';
 export default function Dashboard({ user, activeOrder, deliveredOrders = [], cancelledOrders = [] }) {
     const [selectedOrder, setSelectedOrder] = useState(null);
 
+    // Debug: Log the data structure to help diagnose production issues
+    console.log('Dashboard Data:', {
+        activeOrder,
+        activeOrderItems: activeOrder?.order_items?.length || 0,
+        deliveredOrdersCount: deliveredOrders?.length || 0,
+        cancelledOrdersCount: cancelledOrders?.length || 0,
+    });
+
     const orderStatuses = [
         { key: 'pending', label: 'Placed', color: 'text-blue-600', bgColor: 'bg-blue-100' },
         { key: 'processing', label: 'Processing', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
@@ -90,7 +98,7 @@ export default function Dashboard({ user, activeOrder, deliveredOrders = [], can
                                 Welcome back, {user?.name?.split(' ')[0] || 'there'}! 👋
                             </h1>
                             <p className="mt-2 text-sm text-white/90 sm:text-base">
-                                Track your orders and manage your acco
+                                Track your orders and manage your account
                             </p>
                         </div>
 

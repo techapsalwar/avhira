@@ -29,6 +29,8 @@ class Order extends Model
         'total_amount' => 'decimal:2',
     ];
 
+    protected $with = ['orderItems'];
+
     /**
      * Get the user that owns the order.
      */
@@ -59,7 +61,7 @@ class Order extends Model
     public static function generateOrderNumber()
     {
         do {
-            $orderNumber = 'AVH-' . strtoupper(uniqid());
+            $orderNumber = 'AVH-'.strtoupper(uniqid());
         } while (self::where('order_number', $orderNumber)->exists());
 
         return $orderNumber;
