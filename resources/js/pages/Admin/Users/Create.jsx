@@ -14,7 +14,7 @@ export default function CreateUser() {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('admin.users.store'));
+        post('/admin/users');
     };
 
     return (

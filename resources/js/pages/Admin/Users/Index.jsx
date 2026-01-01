@@ -31,7 +31,7 @@ export default function UsersIndex({ users, filters }) {
 
     const handleDelete = (userId, userName) => {
         if (confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
-            router.delete(route('admin.users.destroy', userId), {
+            router.delete(`/admin/users/${userId}`, {
                 preserveScroll: true,
                 onSuccess: () => {
                     toast.success('User deleted successfully', {
@@ -48,7 +48,7 @@ export default function UsersIndex({ users, filters }) {
     const toggleAdminRole = (userId, currentStatus, userName) => {
         const action = currentStatus ? 'remove admin access from' : 'grant admin access to';
         if (confirm(`Are you sure you want to ${action} "${userName}"?`)) {
-            router.post(route('admin.users.toggle-admin', userId), {}, {
+            router.post(`/admin/users/${userId}/toggle-admin`, {}, {
                 preserveScroll: true,
                 onSuccess: () => {
                     toast.success(`Admin status updated for ${userName}`, {

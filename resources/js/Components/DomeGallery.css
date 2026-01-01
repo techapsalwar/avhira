@@ -200,3 +200,155 @@ main.sphere-main {
 .dg-scroll-lock {
   overflow: hidden !important;
 }
+
+/* ========================================
+   Progressive Image Loading System
+   ======================================== */
+
+/* Container for progressive image */
+.progressive-image {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Skeleton placeholder with shimmer effect */
+.image-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(190, 30, 45, 0.08) 0%,
+    rgba(190, 30, 45, 0.15) 50%,
+    rgba(190, 30, 45, 0.08) 100%
+  );
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+/* Animated shimmer effect */
+.skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s ease-in-out infinite;
+  transform: translateX(-100%);
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Actual image - hidden until loaded */
+.progressive-image .actual-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+  pointer-events: none;
+  backface-visibility: hidden;
+  filter: var(--image-filter, none);
+}
+
+/* Show image when loaded */
+.progressive-image .actual-image.visible {
+  opacity: 1;
+}
+
+/* Hide skeleton when loaded */
+.progressive-image.loaded .image-skeleton {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+/* ========================================
+   Gallery Loading Overlay
+   ======================================== */
+
+.gallery-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(6, 0, 16, 0.95) 0%,
+    rgba(6, 0, 16, 0.98) 100%
+  );
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Elegant loading spinner */
+.loading-spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.spinner-ring {
+  position: absolute;
+  inset: 0;
+  border: 3px solid rgba(190, 30, 45, 0.2);
+  border-top-color: #be1e2d;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Gallery state transitions */
+.sphere-main.gallery-loading {
+  opacity: 0.3;
+  filter: blur(8px);
+  transition: opacity 0.5s ease-out, filter 0.5s ease-out;
+}
+
+.sphere-main.gallery-ready {
+  opacity: 1;
+  filter: blur(0);
+  transition: opacity 0.6s ease-out, filter 0.6s ease-out;
+}
+
+/* Stagger animation for items appearing */
+.gallery-ready .item {
+  animation: itemAppear 0.4s ease-out backwards;
+}
+
+@keyframes itemAppear {
+  from {
+    opacity: 0;
+    transform: rotateY(calc(var(--rot-y) * (var(--offset-x) + ((var(--item-size-x) - 1) / 2)) + var(--rot-y-delta, 0deg)))
+      rotateX(calc(var(--rot-x) * (var(--offset-y) - ((var(--item-size-y) - 1) / 2)) + var(--rot-x-delta, 0deg)))
+      translateZ(calc(var(--radius) * 0.8))
+      scale(0.9);
+  }
+}

@@ -14,7 +14,7 @@ export default function EditUser({ user }) {
 
     const submit = (e) => {
         e.preventDefault();
-        put(route('admin.users.update', user.id));
+        put(`/admin/users/${user.id}`);
     };
 
     return (

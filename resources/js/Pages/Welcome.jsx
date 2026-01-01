@@ -232,7 +232,18 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
 
     return (
         <MainLayout>
-            <Head title="Avhira - Premium Clothing Brand" />
+            <Head title="Avhira - Premium Clothing Brand">
+                {/* Preload critical hero images for faster initial render */}
+                {heroImages.slice(0, 8).map((src, i) => (
+                    <link 
+                        key={`preload-${i}`}
+                        rel="preload" 
+                        href={src} 
+                        as="image"
+                        fetchpriority={i < 4 ? 'high' : 'low'}
+                    />
+                ))}
+            </Head>
             
             {/* Hero Section - Full-Width DomeGallery Background */}
             <section className="relative min-h-[580px] sm:min-h-[460px] lg:min-h-[900px] flex items-center overflow-hidden -mt-20 sm:-mt-24 lg:-mt-40" 
@@ -248,6 +259,7 @@ export default function Welcome({ featuredForHer, featuredForHim, categories }) 
                         maxVerticalRotationDeg={2}
                         grayscale={false}
                         imageBorderRadius="30px"
+                        priorityCount={12}
                         openedImageWidth="400px"
                         openedImageHeight="450px"
                     />

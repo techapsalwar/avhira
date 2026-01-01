@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import { useGesture } from '@use-gesture/react';
 import './DomeGallery.css';
 
@@ -13,6 +13,58 @@ const getDataNumber = (el, name, fallback) => {
   const n = attr == null ? NaN : parseFloat(attr);
   return Number.isFinite(n) ? n : fallback;
 };
+
+// Progressive image component with blur-up effect
+function ProgressiveImage({ src, alt, onLoad, priority = false }) {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    // Reset state when src changes
+    setIsLoaded(false);
+    setHasError(false);
+    
+    // Check if image is already cached
+    if (imgRef.current?.complete && imgRef.current?.naturalWidth > 0) {
+      setIsLoaded(true);
+      onLoad?.();
+    }
+  }, [src]);
+
+  const handleLoad = () => {
+    setIsLoaded(true);
+    onLoad?.();
+  };
+
+  const handleError = () => {
+    setHasError(true);
+  };
+
+  return (
+    <div className={`progressive-image ${isLoaded ? 'loaded' : 'loading'}`}>
+      {/* Skeleton shimmer - shows while loading */}
+      {!isLoaded && !hasError && (
+        <div className="image-skeleton">
+          <div className="skeleton-shimmer" />
+        </div>
+      )}
+      
+      {/* Actual image with fade-in */}
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        draggable={false}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding={priority ? 'sync' : 'async'}
+        onLoad={handleLoad}
+        onError={handleError}
+        className={`actual-image ${isLoaded ? 'visible' : ''}`}
+      />
+    </div>
+  );
+}
 
 function buildItems(pool, seg) {
   const xCols = Array.from({ length: seg }, (_, i) => -37 + i * 2);
@@ -82,7 +134,8 @@ export default function DomeGallery({
   openedImageHeight = '350px',
   imageBorderRadius = '30px',
   openedImageBorderRadius = '30px',
-  grayscale = true
+  grayscale = true,
+  priorityCount = 8 // Number of images to load with priority
 }) {
   const rootRef = useRef(null);
   const mainRef = useRef(null);
@@ -102,6 +155,22 @@ export default function DomeGallery({
   const openingRef = useRef(false);
   const openStartedAtRef = useRef(0);
   const lastDragEndAt = useRef(0);
+
+  // Track loading progress
+  const [loadedCount, setLoadedCount] = useState(0);
+  const [isGalleryReady, setIsGalleryReady] = useState(false);
+  const totalImages = images.length;
+
+  // Mark gallery as ready when enough images are loaded
+  useEffect(() => {
+    if (loadedCount >= Math.min(priorityCount, totalImages)) {
+      setIsGalleryReady(true);
+    }
+  }, [loadedCount, priorityCount, totalImages]);
+
+  const handleImageLoad = useCallback(() => {
+    setLoadedCount(prev => prev + 1);
+  }, []);
 
   const scrollLockedRef = useRef(false);
   const lockScroll = useCallback(() => {
@@ -602,37 +671,56 @@ export default function DomeGallery({
         ['--image-filter']: grayscale ? 'grayscale(1)' : 'none'
       }}
     >
-      <main ref={mainRef} className="sphere-main">
+      {/* Loading overlay - shows until priority images are loaded */}
+      {!isGalleryReady && (
+        <div className="gallery-loading-overlay">
+          <div className="loading-spinner">
+            <div className="spinner-ring" />
+          </div>
+        </div>
+      )}
+
+      <main ref={mainRef} className={`sphere-main ${isGalleryReady ? 'gallery-ready' : 'gallery-loading'}`}>
         <div className="stage">
           <div ref={sphereRef} className="sphere">
-            {items.map((it, i) => (
-              <div
-                key={`${it.x},${it.y},${i}`}
-                className="item"
-                data-src={it.src}
-                data-offset-x={it.x}
-                data-offset-y={it.y}
-                data-size-x={it.sizeX}
-                data-size-y={it.sizeY}
-                style={{
-                  ['--offset-x']: it.x,
-                  ['--offset-y']: it.y,
-                  ['--item-size-x']: it.sizeX,
-                  ['--item-size-y']: it.sizeY
-                }}
-              >
+            {items.map((it, i) => {
+              // First few items get priority loading (front-facing on initial view)
+              const isPriority = i < priorityCount;
+              
+              return (
                 <div
-                  className="item__image"
-                  role="button"
-                  tabIndex={0}
-                  aria-label={it.alt || 'Open image'}
-                  onClick={onTileClick}
-                  onPointerUp={onTilePointerUp}
+                  key={`${it.x},${it.y},${i}`}
+                  className="item"
+                  data-src={it.src}
+                  data-offset-x={it.x}
+                  data-offset-y={it.y}
+                  data-size-x={it.sizeX}
+                  data-size-y={it.sizeY}
+                  style={{
+                    ['--offset-x']: it.x,
+                    ['--offset-y']: it.y,
+                    ['--item-size-x']: it.sizeX,
+                    ['--item-size-y']: it.sizeY
+                  }}
                 >
-                  <img src={it.src} draggable={false} alt={it.alt} />
+                  <div
+                    className="item__image"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={it.alt || 'Open image'}
+                    onClick={onTileClick}
+                    onPointerUp={onTilePointerUp}
+                  >
+                    <ProgressiveImage 
+                      src={it.src} 
+                      alt={it.alt}
+                      priority={isPriority}
+                      onLoad={handleImageLoad}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
