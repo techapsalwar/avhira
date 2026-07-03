@@ -21,6 +21,10 @@ Route::get('/about', function () {
     return Inertia::render('About');
 })->name('about');
 
+// Policies
+Route::get('/policies/{slug}', [\App\Http\Controllers\PolicyController::class, 'show'])->name('policies.show');
+
+
 // Products
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');

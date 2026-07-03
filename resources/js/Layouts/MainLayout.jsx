@@ -449,15 +449,21 @@ export default function MainLayout({ children }) {
                         <div>
                             <h4 className="font-semibold mb-4">Policy Highlights</h4>
                             <ul className="space-y-2">
-                                <li className="text-gray-400">Privacy & Data Protection</li>
-                                <li className="text-gray-400">Terms & Conditions</li>
-                                <li className="text-gray-400">Shipping & Delivery</li>
-                                <li className="text-gray-400">Returns, Refunds & Exchange</li>
+                                <li><Link href="/policies/privacy-policy" className="text-gray-400 hover:text-avhira-red">Privacy Policy</Link></li>
+                                <li><Link href="/policies/terms-and-conditions" className="text-gray-400 hover:text-avhira-red">Terms & Conditions</Link></li>
+                                <li><Link href="/policies/shipping-policy" className="text-gray-400 hover:text-avhira-red">Shipping Policy</Link></li>
+                                <li><Link href="/policies/return-refund-exchange" className="text-gray-400 hover:text-avhira-red">Return, Refund & Exchange</Link></li>
+                                <li><Link href="/policies/cancellation-policy" className="text-gray-400 hover:text-avhira-red">Cancellation Policy</Link></li>
+                                <li><Link href="/policies/cookie-policy" className="text-gray-400 hover:text-avhira-red">Cookie Policy</Link></li>
+                                <li><Link href="/policies/disclaimer" className="text-gray-400 hover:text-avhira-red">Disclaimer</Link></li>
+                                <li><Link href="/policies/grievance-redressal" className="text-gray-400 hover:text-avhira-red">Grievance Redressal</Link></li>
                             </ul>
                         </div>
                         <div>
                             <h4 className="font-semibold mb-4">Support & Contact</h4>
                             <ul className="space-y-2">
+                                <li><Link href="/policies/contact-us" className="text-gray-400 hover:text-avhira-red">Contact Us</Link></li>
+                                <li><Link href="/policies/faqs" className="text-gray-400 hover:text-avhira-red">FAQs</Link></li>
                                 <li><a href="mailto:avhirahouse@gmail.com" className="text-gray-400 hover:text-avhira-red">avhirahouse@gmail.com</a></li>
                                 <li><a href="tel:+919157903173" className="text-gray-400 hover:text-avhira-red">+91-9157903173</a></li>
                                 <li className="text-gray-400">Mon-Sat, 10:00 AM - 6:00 PM IST</li>
