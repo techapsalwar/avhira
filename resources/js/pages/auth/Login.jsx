@@ -19,7 +19,7 @@ export default function Login({ status, canResetPassword }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('login.store'));
+        post('/login');
     };
 
     return (
@@ -103,7 +103,7 @@ export default function Login({ status, canResetPassword }) {
 
                             {canResetPassword && (
                                 <Link
-                                    href={route('password.request')}
+                                    href="/forgot-password"
                                     className="text-sm hover:underline"
                                     style={{ color: '#be1e2d' }}
                                 >
@@ -128,7 +128,7 @@ export default function Login({ status, canResetPassword }) {
                         <p className="text-sm text-gray-600">
                             Don't have an account?{' '}
                             <Link
-                                href={route('register')}
+                                href="/register"
                                 className="font-semibold hover:underline"
                                 style={{ color: '#be1e2d' }}
                             >

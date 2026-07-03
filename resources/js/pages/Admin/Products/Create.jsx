@@ -5,7 +5,12 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { useState } from 'react';
 
 export default function CreateProduct({ mainCategories }) {
+    const csrfToken = typeof document !== 'undefined'
+        ? (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '')
+        : '';
+
     const { data, setData, post, processing, errors } = useForm({
+        _token: csrfToken,
         name: '',
         main_category_id: '',
         subcategory_id: '',
@@ -79,6 +84,14 @@ export default function CreateProduct({ mainCategories }) {
         });
     };
 
+    const imageErrors = Object.entries(errors)
+        .filter(([key]) => key === 'images' || key.startsWith('images.'))
+        .map(([, value]) => value)
+        .filter(Boolean);
+
+    const generalErrors = Object.entries(errors)
+        .filter(([key]) => !key.startsWith('images.'));
+
     return (
         <AdminLayout title="Create Product">
             <Head title="Create Product - Admin" />
@@ -86,6 +99,17 @@ export default function CreateProduct({ mainCategories }) {
             <div className="max-w-4xl">
                 <div className="bg-white rounded-2xl shadow-md p-8">
                     <form onSubmit={submit} className="space-y-6">
+                        {generalErrors.length > 0 && (
+                            <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                                <p className="text-sm font-semibold text-red-700">Please fix the highlighted fields:</p>
+                                <ul className="mt-2 list-disc list-inside text-sm text-red-700 space-y-1">
+                                    {generalErrors.map(([key, message]) => (
+                                        <li key={key}>{message}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
                         {/* Basic Info */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -274,7 +298,13 @@ export default function CreateProduct({ mainCategories }) {
                                 onChange={handleImageChange}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-avhira-red focus:border-transparent"
                             />
-                            {errors.images && <p className="mt-1 text-sm text-red-600">{errors.images}</p>}
+                            {imageErrors.length > 0 && (
+                                <div className="mt-2 space-y-1">
+                                    {imageErrors.map((message, index) => (
+                                        <p key={index} className="text-sm text-red-600">{message}</p>
+                                    ))}
+                                </div>
+                            )}
                             
                             {imagePreviews.length > 0 && (
                                 <div className="mt-4 grid grid-cols-4 gap-4">

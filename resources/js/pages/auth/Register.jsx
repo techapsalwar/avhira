@@ -20,7 +20,7 @@ export default function Register() {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('register.store'));
+        post('/register');
     };
 
     return (
@@ -139,7 +139,7 @@ export default function Register() {
                         <p className="text-sm text-gray-600">
                             Already have an account?{' '}
                             <Link
-                                href={route('login')}
+                                href="/login"
                                 className="font-semibold hover:underline"
                                 style={{ color: '#be1e2d' }}
                             >

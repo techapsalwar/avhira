@@ -5,7 +5,12 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { useState } from 'react';
 
 export default function EditProduct({ product, mainCategories }) {
+    const csrfToken = typeof document !== 'undefined'
+        ? (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '')
+        : '';
+
     const { data, setData, post, processing, errors } = useForm({
+        _token: csrfToken,
         name: product.name || '', 
         main_category_id: product.subcategory?.main_category_id || '',
         subcategory_id: product.subcategory_id || '',
